@@ -1,15 +1,13 @@
 import React from 'react';
-import { Button, NativeBaseProvider, Box, Center, FormControl, VStack} from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack} from 'native-base';
 
 
-export const FrmSingIn = () => {
+// Navegacion de Inicio
+export const LogIn = ({navigation}) => {
     const [user, setUser] = React.useState({});
     const [pass, setPass] = React.useState({});
-    const [name, setName] = React.useState({});
-    const [adress, setAdress] = React.useState({});
-    const [tlp, setTlp] = React.useState({});
-    return (
-        <NativeBaseProvider>
+    const Iuser = () => {
+        return (
             <VStack><FormControl isRequired>
                 <FormControl.Label>Nombre de Usuario</FormControl.Label>
                 <Input 
@@ -19,6 +17,10 @@ export const FrmSingIn = () => {
                 />
                 <FormControl.ErrorMessage>Elija un usuario diferente!</FormControl.ErrorMessage>
             </FormControl></VStack>
+        );
+    }
+    const Ipass = () => {
+        return (
             <VStack><FormControl isRequired>
                 <FormControl.Label>Contraseña</FormControl.Label>
                 <Input 
@@ -28,6 +30,63 @@ export const FrmSingIn = () => {
                 />
                 <FormControl.ErrorMessage>Elija una contraseña mas fuerte!</FormControl.ErrorMessage>
             </FormControl></VStack>
+        );
+    }
+    const Blogin = () => {
+        return <Button onPress={() => console.log("Entrando...")}>Entrar</Button>
+    }
+    const BsignIn = () => {
+        return <Button onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>
+    }
+    return(
+        <NativeBaseProvider>
+            <Box>
+                <Iuser/>
+                <Ipass/>
+                <Blogin/>
+            </Box>
+            <Box>
+                <BsignIn/>
+            </Box>
+        </NativeBaseProvider>
+    );
+}
+
+export const SingIn = ({navigation}) => {
+    const [user, setUser] = React.useState({});
+    const [pass, setPass] = React.useState({});
+    const [name, setName] = React.useState({});
+    const [adress, setAdress] = React.useState({});
+    const [tlp, setTlp] = React.useState({});
+
+    const Iuser = () => {
+        return (
+            <VStack><FormControl isRequired>
+                <FormControl.Label>Nombre de Usuario</FormControl.Label>
+                <Input 
+                    p={2} 
+                    placeholder='Usuario'
+                    onChangeText={(value) => setUser({ ...user, name: value })}
+                />
+                <FormControl.ErrorMessage>Elija un usuario diferente!</FormControl.ErrorMessage>
+            </FormControl></VStack>
+        );
+    }
+    const Ipass = () => {
+        return (
+            <VStack><FormControl isRequired>
+                <FormControl.Label>Contraseña</FormControl.Label>
+                <Input 
+                    p={2} 
+                    placeholder='Contraseña'
+                    onChangeText={(value) => setPass({ ...pass, name: value })}
+                />
+                <FormControl.ErrorMessage>Elija una contraseña mas fuerte!</FormControl.ErrorMessage>
+            </FormControl></VStack>
+        );
+    }
+    const Iname = () => {
+        return (
             <VStack><FormControl isRequired>
                 <FormControl.Label>Nombre Completo</FormControl.Label>
                 <Input 
@@ -37,55 +96,52 @@ export const FrmSingIn = () => {
                 />
                 <FormControl.ErrorMessage>Escriba su nombre completo!</FormControl.ErrorMessage>
             </FormControl></VStack>
-
-            <VStack><FormControl isRequired>
-                <FormControl.Label>Domicilio</FormControl.Label>
-                <Input 
-                    p={2} 
-                    placeholder='Domicilio'
-                    onChangeText={(value) => setAdress({ ...adress, name: value })}
-                />
-                <FormControl.ErrorMessage>Escriba calle y número de domicilio!</FormControl.ErrorMessage>
-            </FormControl></VStack>
-
-            <VStack><FormControl isRequired>
-                <FormControl.Label>Teléfono</FormControl.Label>
-                <Input 
-                    p={2} 
-                    placeholder='Teléfono'
-                    onChangeText={(value) => setTlp({ ...tlp, name: value })}
-                />
-                <FormControl.ErrorMessage>Ingrese su número a 10 digitos!</FormControl.ErrorMessage>
-            </FormControl></VStack>
-        </NativeBaseProvider>
-    );
-}
-export const Home = () => {
-    export const User = ()  => {
-        return <Input>Usuario</Input>
+        );
     }
-    export const Pass = () => {
-        return <Input>Contraseña</Input>
-    } 
-    export const Login = () => {
-        return <Button onPress={() => console.log("hello world")}>Entrar</Button>
+    const Iadress = () => {
+        return(
+        <VStack><FormControl isRequired>
+            <FormControl.Label>Domicilio</FormControl.Label>
+            <Input 
+                p={2} 
+                placeholder='Domicilio'
+                onChangeText={(value) => setAdress({ ...adress, name: value })}
+            />
+            <FormControl.ErrorMessage>Escriba calle y número de domicilio!</FormControl.ErrorMessage>
+        </FormControl></VStack>
+        );
     }
-    return(
+    const Iphone = () => {
+        return (
+        <VStack><FormControl isRequired>
+            <FormControl.Label>Teléfono</FormControl.Label>
+            <Input 
+                p={2} 
+                placeholder='Teléfono'
+                onChangeText={(value) => setTlp({ ...tlp, name: value })}
+            />
+            <FormControl.ErrorMessage>Ingrese su número a 10 digitos!</FormControl.ErrorMessage>
+        </FormControl></VStack>
+        );
+    }
+    const Register = () => {
+        //Validar
+        
+    }
+    const Bregister = () => {
+        return <Button onPress={Register}>Registrar</Button>
+    }
+    return (
         <NativeBaseProvider>
-            <Box>
-                <User/>
-                <Pass/>
-                <Login/>
-            </Box>
+            <Iuser/>
+            <Ipass/>
+            <Iname/>
+            <Iadress/>
+            <Iphone/>
+            <Bregister/>
         </NativeBaseProvider>
     );
 }
-export const SigIn = () => {
-    return(
-        <NativeBaseProvider>
-            <Box>
-                
-            </Box>
-        </NativeBaseProvider>
-    );
-}
+
+
+// Navegacion principal
