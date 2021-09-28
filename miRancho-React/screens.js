@@ -1,147 +1,201 @@
 import React from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack} from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link} from 'native-base';
 
 
 // Navegacion de Inicio
 export const LogIn = ({navigation}) => {
-    const [user, setUser] = React.useState({});
-    const [pass, setPass] = React.useState({});
-    const Iuser = () => {
-        return (
-            <VStack><FormControl isRequired>
-                <FormControl.Label>Nombre de Usuario</FormControl.Label>
-                <Input 
-                    p={2} 
-                    placeholder='Usuario'
-                    onChangeText={(value) => setUser({ ...user, name: value })}
-                />
-                <FormControl.ErrorMessage>Elija un usuario diferente!</FormControl.ErrorMessage>
-            </FormControl></VStack>
-        );
+    const [data, setData] = React.useState({});
+    const [errors, setError] = React.useState({});
+    const handleLogin = () => {
+        //Validar
+        console.log("validando")
+        if (data.user === undefined || data.user === ''){
+            setError({...errors,user:'Se necesita un usuario'})
+            return false;
+        }   
+        if (data.pass === undefined || data.pass === ''){
+            setError({...errors,pass:'Se necesita una contraseña'})
+            return false;
+        }
+        //Peticion HTTP
+        console.log(data.user,data.pass)
     }
-    const Ipass = () => {
-        return (
-            <VStack><FormControl isRequired>
-                <FormControl.Label>Contraseña</FormControl.Label>
-                <Input 
-                    p={2} 
-                    placeholder='Contraseña'
-                    onChangeText={(value) => setPass({ ...pass, name: value })}
-                />
-                <FormControl.ErrorMessage>Elija una contraseña mas fuerte!</FormControl.ErrorMessage>
-            </FormControl></VStack>
-        );
-    }
-    const Blogin = () => {
-        return <Button onPress={() => console.log("Entrando...")}>Entrar</Button>
-    }
-    const BsignIn = () => {
-        return <Button onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>
-    }
+   
     return(
         <NativeBaseProvider>
             <Box>
-                <Iuser/>
-                <Ipass/>
-                <Blogin/>
+                <VStack><FormControl isRequired isInvalid={'user' in errors}>
+                        <FormControl.Label>Nombre de Usuario</FormControl.Label>
+                        <Input 
+                            placeholder='Usuario'
+                            onChangeText={(value) => setData({...data, user:value})}
+                        />
+                        {'user' in errors ?
+                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.user}</FormControl.ErrorMessage>:
+                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                        }
+                    
+                </FormControl></VStack>
+                <VStack>
+                    <FormControl isRequired isInvalid={'pass' in errors}>
+                        <FormControl.Label>Contraseña</FormControl.Label>
+                        <Input 
+                            placeholder='Contraseña'
+                            type = 'password'
+                            onChangeText={(value) => setData({...data, pass:value})}
+                        />
+                        {'pass' in errors ?
+                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.pass}</FormControl.ErrorMessage>:
+                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                        }
+                    </FormControl>
+                </VStack>
+                <Button onPress={handleLogin}>Entrar</Button>
             </Box>
             <Box>
-                <BsignIn/>
+                <Button onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>
             </Box>
         </NativeBaseProvider>
     );
 }
 
 export const SingIn = ({navigation}) => {
-    const [user, setUser] = React.useState({});
-    const [pass, setPass] = React.useState({});
-    const [name, setName] = React.useState({});
-    const [adress, setAdress] = React.useState({});
-    const [tlp, setTlp] = React.useState({});
+    const [data, setData] = React.useState({});
+        // user,name,pass,cpass,address, phone, terms.
+    const [errors, setError] = React.useState({});
+ 
+    const HandleRegister = () => {
+        if (data.user === undefined ) {
+            setError(...errors, {user:'Se necesita usuario'})
+            return false;
+        }
+        if (data.pass === undefined ) {
+            setError(...errors, {pass:'Se necesita contraseña'})
+            return false;
+        }
+        if (data.cpass === undefined ) {
+            setError(...errors, {pass:'Se necesita confirmar la contraseña'})
+            return false;
+        }
+        if (data.name === undefined ) {
+            setError(...errors, {name:'Se necesita el nombre'})
+            return false;
+        }
+        if (data.address === undefined ) {
+            setError(...errors, {address:'Se necesita domicilio'})
+            return false;
+        }
+        if (data.phone === undefined ) {
+            setError(...errors, {phone:'Se necesita número de celular'})
+            return false;
+        }
+        if (data.terms === undefined ) {
+            setError(...errors, {terms:'Se aceptar los términos y condiciones de uso'})
+            return false;
+        }
+        if (data.pass != data.cpass){
+            setError(...errors, {pass:'Las contraseñas no coinciden'})
+            return false;
+        }
+        // Comprobar si existe el usuario
+        //Comprobar el telefono 
+    }
+    return (
+        <NativeBaseProvider>
 
-    const Iuser = () => {
-        return (
-            <VStack><FormControl isRequired>
+            <VStack><FormControl isRequired isInvalid={'user' in errors}>
                 <FormControl.Label>Nombre de Usuario</FormControl.Label>
                 <Input 
                     p={2} 
                     placeholder='Usuario'
-                    onChangeText={(value) => setUser({ ...user, name: value })}
+                    onChangeText={(value) => setData(...data, {user: value})}
                 />
-                <FormControl.ErrorMessage>Elija un usuario diferente!</FormControl.ErrorMessage>
+                {'user' in errors ?
+                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.user}</FormControl.ErrorMessage>:
+                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                }
             </FormControl></VStack>
-        );
-    }
-    const Ipass = () => {
-        return (
-            <VStack><FormControl isRequired>
+
+            <VStack><FormControl isRequired isInvalid={'pass' in errors}>
                 <FormControl.Label>Contraseña</FormControl.Label>
                 <Input 
                     p={2} 
                     placeholder='Contraseña'
-                    onChangeText={(value) => setPass({ ...pass, name: value })}
+                    onChangeText={(value) => setData(...data, {pass:value})}
+                    type = 'password'
                 />
-                <FormControl.ErrorMessage>Elija una contraseña mas fuerte!</FormControl.ErrorMessage>
+                <Input
+                    p={2}
+                    placeholder='Confirmar contraseña'
+                    onChangeText={(value)=> setData(...data, {cpass:value})}
+                    type = 'password'
+                />
+                {'pass' in errors ?
+                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.pass}</FormControl.ErrorMessage>:
+                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                }
             </FormControl></VStack>
-        );
-    }
-    const Iname = () => {
-        return (
-            <VStack><FormControl isRequired>
+            
+            <VStack><FormControl isRequired isInvalid={'name' in errors}>
                 <FormControl.Label>Nombre Completo</FormControl.Label>
                 <Input 
                     p={2} 
                     placeholder='Nombre'
-                    onChangeText={(value) => setName({ ...name, name: value })}
+                    onChangeText={(value) => setData(...data, {name:value})}
                 />
-                <FormControl.ErrorMessage>Escriba su nombre completo!</FormControl.ErrorMessage>
+                {'name' in errors ?
+                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.name}</FormControl.ErrorMessage>:
+                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Escriba nombre completo</FormControl.HelperText>
+                }
             </FormControl></VStack>
-        );
-    }
-    const Iadress = () => {
-        return(
-        <VStack><FormControl isRequired>
+
+            <VStack><FormControl isRequired isInvalid={'address' in errors}>
             <FormControl.Label>Domicilio</FormControl.Label>
             <Input 
                 p={2} 
                 placeholder='Domicilio'
-                onChangeText={(value) => setAdress({ ...adress, name: value })}
+                onChangeText={(value) => setData(...data, {address:value})}
             />
-            <FormControl.ErrorMessage>Escriba calle y número de domicilio!</FormControl.ErrorMessage>
-        </FormControl></VStack>
-        );
-    }
-    const Iphone = () => {
-        return (
-        <VStack><FormControl isRequired>
-            <FormControl.Label>Teléfono</FormControl.Label>
-            <Input 
-                p={2} 
-                placeholder='Teléfono'
-                onChangeText={(value) => setTlp({ ...tlp, name: value })}
-            />
-            <FormControl.ErrorMessage>Ingrese su número a 10 digitos!</FormControl.ErrorMessage>
-        </FormControl></VStack>
-        );
-    }
-    const Register = () => {
-        //Validar
-        
-    }
-    const Bregister = () => {
-        return <Button onPress={Register}>Registrar</Button>
-    }
-    return (
-        <NativeBaseProvider>
-            <Iuser/>
-            <Ipass/>
-            <Iname/>
-            <Iadress/>
-            <Iphone/>
-            <Bregister/>
+
+            {'address' in errors ?
+                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.address}</FormControl.ErrorMessage>:
+                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Agregue un domicilio</FormControl.HelperText>
+                }
+            </FormControl></VStack>
+            
+            <VStack><FormControl isRequired isInvalid={'phone' in errors}>
+                <FormControl.Label>Teléfono</FormControl.Label>
+                <Input 
+                    p={2} 
+                    placeholder='Teléfono'
+                    onChangeText={(value) => setData(...data, {phone:value})}
+                />
+                {'user' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.phone}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+            </FormControl></VStack>
+
+            <VStack><FormControl isRequired isInvalid={'terms' in errors}>
+                <Checkbox onChange={() => setData(...data, {terms:value})}>
+                    Aceptar  
+                    <Link onPress={()=>navigation.navigate('terms')}> terminos y condiciones de uso</Link>
+                </Checkbox>
+                    
+            </FormControl></VStack>
+
+            <VStack><Button onPress={HandleRegister}>Registrar</Button></VStack>
         </NativeBaseProvider>
     );
 }
-
+export const Terms = ({navigation}) => {
+    return(
+        <NativeBaseProvider>
+            <Box>
+                Aqui estan los terminos y condiciones jeje
+            </Box>
+        </NativeBaseProvider>
+    );
+}
 
 // Navegacion principal

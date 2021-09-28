@@ -18,6 +18,7 @@ const Inicio = () => {
       <NavLogin.Navigator>
         <NavLogin.Screen name='login' component={screens.LogIn}/>
         <NavLogin.Screen name='singin' component={screens.SingIn}/>
+        <NavLogin.Screen name='terms' component={screens.Terms}/>
       </NavLogin.Navigator>
     </NavigationContainer>
   );
