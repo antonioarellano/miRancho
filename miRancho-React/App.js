@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {NativeBaseProvider} from 'native-base';
 import 'react-native-gesture-handler';
@@ -8,33 +8,54 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import * as screens from './screens';
+import { UserContext } from './UserContext';
 
 const NavLogin = createNativeStackNavigator();
-const NavPrincipal = createDrawerNavigator();
+const NavRancho = createDrawerNavigator();
+const NavMain = createNativeStackNavigator();
 
-const Inicio = () => {
-  return(
+
+const Inicio = ({navigation}) => {
+  return(          
+    <NavLogin.Navigator>
+      <NavLogin.Screen name='login' component={screens.LogIn}/>
+      <NavLogin.Screen name='singin' component={screens.SingIn}/>
+      <NavLogin.Screen name='terms' component={screens.Terms}/>
+    </NavLogin.Navigator>
+  );
+}
+const Rancho = ({navigation}) => {
+  return (
+    <NavRancho.Navigator>
+        <NavRancho.Screen name='ganado' component={screens.Ganado}/>
+        <NavRancho.Screen name='vacunas' component={screens.Vacunas}/>
+        <NavRancho.Screen name='ctlSanitario' component={screens.ControlSan}/>
+        <NavRancho.Screen name='embarazo' component={screens.ControlRep}/>
+        <NavRancho.Screen name='pesaje' component={screens.Pesaje}/>
+        <NavRancho.Screen name='predios' component={screens.Predio}/>
+        <NavRancho.Screen name='configuracion' component={screens.Configuracion}/>
+    </NavRancho.Navigator>
+  );
+}
+const Main = () => {
+  return (
     <NavigationContainer>
       <NavLogin.Navigator>
-        <NavLogin.Screen name='login' component={screens.LogIn}/>
-        <NavLogin.Screen name='singin' component={screens.SingIn}/>
-        <NavLogin.Screen name='terms' component={screens.Terms}/>
+        <NavMain.Screen name='inicio' component={Inicio} />
+        <NavMain.Screen name='rancho' component={Rancho} />
       </NavLogin.Navigator>
     </NavigationContainer>
   );
 }
-const Principal = () => {
-  return (
-    <Drawer.Navigator>
-      <Drawer.Screen name="Feed" component={Feed} />
-      <Drawer.Screen name="Article" component={Article} />
-    </Drawer.Navigator>
-  );
-}
 export default function App() {
+  const [user, setUser] = useState(null);
+  const providerValue = useMemo(()=> ({user,setUser}), [user,setUser]);
+  
   return (
     <NativeBaseProvider >
-      <Inicio/>
+      <UserContext.Provider value= {providerValue}>
+        <Main/>
+      </UserContext.Provider>
     </NativeBaseProvider>
   );
 }
