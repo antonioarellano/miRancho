@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Switch, Select, Radio} from 'native-base';
 import DatePicker from "react-datepicker";
 import { UserContext } from './UserContext';
-
+import moment from 'moment'
 // Navegacion de Inicio //
 
 //Screen LogIn
@@ -17,6 +17,7 @@ export const LogIn = ({navigation}) => {
     const handleLogin = () => {
         navigation.navigate('rancho')
         //Validar
+        /* 
         console.log("validando")
         if (data.user === undefined || data.user === ''){
             setError({...errors,user:'Se necesita un usuario'})
@@ -27,7 +28,9 @@ export const LogIn = ({navigation}) => {
             return false;
         }
         const user = getUser();
+         
         setUser(user);
+        */
         //Peticion HTTP
         // Establece el user de context
         
@@ -218,7 +221,7 @@ var animal = {
     arete:'',
     nombre:'',
     sexo:'',
-    fecha:new Date(),
+    fecha:new Date(moment().format('DD-MM-YYYY')),
     raza:'',
     color:'',
     predio:'',
@@ -230,21 +233,19 @@ export const Ganado = ({navigation}) => {
     const user = React.useContext(UserContext)
     return (
         <NativeBaseProvider>
-            //Busqueda 
             <VStack alignItems="center" space={4}>
                 <Select
                     selectedValue={key.type}
-                    placeholder="Busqueda"
                     mt={1}
                     onValueChange={(itemValue) => setKey({...key, type:itemValue})}
                 >
                     <Select.Item label="Nombre" value="nombre" />
                     <Select.Item label="Arete" value="arete" />
                 </Select>
-                <FormControl>
+                <FormControl isInvalid={'search' in errors}>
                     <FormControl.Label>Busqueda</FormControl.Label>
                         <Input 
-                            placeholder={key}
+                            placeholder={key.type}
                             onChangeText={(value) => setkey({...key, word:value})}
                         />
                         {'key' in errors ?
@@ -255,20 +256,20 @@ export const Ganado = ({navigation}) => {
                 <Button >Buscar</Button>
             </VStack>
 
-            //Formulario Ganado
-            //Arete
+
             <VStack><FormControl isInvalid={'arete' in errors}>
                 <FormControl.Label>Arete</FormControl.Label>
                 <Input
                     placeholder={data.arete}
-                    onChangeText = {(value) => setData({...data, arete:value})}
+                    //onChangeText = {(value) => setData({...data, arete:value})}
                 />
                 {'arete' in errors ?
                 <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.arete}</FormControl.ErrorMessage>:
                     <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                 }
             </FormControl></VStack>
-            //Nombre
+
+
             <VStack><FormControl isInvalid={'nombre' in errors}>
                 <FormControl.Label>Nombre</FormControl.Label>
                 <Input
@@ -280,7 +281,8 @@ export const Ganado = ({navigation}) => {
                     <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                 }
             </FormControl></VStack>
-            //Sexo
+
+
             <VStack><FormControl isInvalid={'sexo' in errors}>
                 <FormControl.Label>Sexo</FormControl.Label>
                 <Radio.Group
@@ -303,7 +305,8 @@ export const Ganado = ({navigation}) => {
                     <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                 }
             </FormControl></VStack>
-            //Fecha de nacimiento
+
+
             <VStack><FormControl isInvalid={'fecha' in errors}>
                 <FormControl.Label>Fecha</FormControl.Label>
                 <DatePicker selected={data.fecha} onChange={(date) => setData({...data, fecha:date})} />
@@ -312,7 +315,8 @@ export const Ganado = ({navigation}) => {
                     <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                 }
             </FormControl></VStack>
-            //Raza
+
+
             <VStack><FormControl isInvalid={'raza' in errors}>
                 <FormControl.Label>Raza</FormControl.Label>
                 <Input
@@ -324,7 +328,8 @@ export const Ganado = ({navigation}) => {
                     <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                 }
             </FormControl></VStack>
-            //Color
+
+
             <VStack><FormControl isInvalid={'color' in errors}>
                 <FormControl.Label>Color</FormControl.Label>
                 <Input
@@ -336,7 +341,8 @@ export const Ganado = ({navigation}) => {
                     <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                 }
             </FormControl></VStack>
-            //Predio
+
+
             <VStack><FormControl isInvalid={'predio' in errors}>
                 <FormControl.Label>Predio</FormControl.Label>
                 <Input
@@ -375,7 +381,8 @@ export const Vacunas = ({navigation }) => {
     const user = React.useContext(UserContext)
     return (
         <NativeBaseProvider>
-            //Busqueda 
+
+
             <VStack alignItems="center" space={4}>
                 <Select
                     selectedValue={key.type}
@@ -446,7 +453,7 @@ export const ControlSan = ({navigation}) =>{
     const user = React.useContext(UserContext)
     return (
         <NativeBaseProvider>
-            //Busqueda 
+
             <VStack alignItems="center" space={4}>
                 <Select
                     selectedValue={key.type}
@@ -512,7 +519,7 @@ var embarazo = {
 }
 export const ControlRep = ({navigation}) => {
     <NativeBaseProvider>
-        //Busqueda 
+
         <VStack alignItems="center" space={4}>
             <Select
                 selectedValue={key.type}
@@ -537,12 +544,12 @@ export const ControlRep = ({navigation}) => {
             </FormControl>
             <Button >Buscar</Button>
         </VStack>
-        //Codigo
+
         <VStack><FormControl isInvalid={'codigo' in errors}>
             <FormControl.Label>Codigo</FormControl.Label>
             <Label value={data.codigo}/>
         </FormControl></VStack>
-        //INICIO
+
         <VStack><FormControl isInvalid={'inicio' in errors}>
             <FormControl.Label>Fecha de inicio</FormControl.Label>
             <DatePicker selected={data.inicio} onChange={(date) => setData({...data, inicio:date})} />
@@ -551,7 +558,7 @@ export const ControlRep = ({navigation}) => {
                 <FormControl.HelperText _text={{fontSize: 'xs'}}>Verificar fecha</FormControl.HelperText>
             }
         </FormControl></VStack>
-        //FIN
+
         <VStack><FormControl isInvalid={'fin' in errors}>
             <FormControl.Label>Fecha de fin</FormControl.Label>
             <DatePicker selected={data.fecha} onChange={(date) => setData({...data, fin:date})} />
@@ -583,7 +590,7 @@ export const Pesaje = ({navigation}) => {
     const user = React.useContext(UserContext)
     return (
         <NativeBaseProvider>
-            //Busqueda 
+
             <VStack alignItems="center" space={4}>
                 <Select
                     selectedValue={key.type}
@@ -660,7 +667,7 @@ export const Predio = ( {navitagion}) => {
     const user = React.useContext(UserContext)
     return (
         <NativeBaseProvider>
-            //Busqueda 
+
             <VStack alignItems="center" space={4}>
                 <FormControl>
                     <FormControl.Label>Nombre</FormControl.Label>
