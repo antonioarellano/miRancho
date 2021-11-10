@@ -1,8 +1,9 @@
 import React from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Switch, Select, Radio} from 'native-base';
-import DatePicker from "react-datepicker";
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Switch, Select, Radio, ScrollView, Divider, Center, Container, Flex} from 'native-base';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from './UserContext';
 import moment from 'moment'
+import { backgroundColor } from 'styled-system';
 // Navegacion de Inicio //
 
 //Screen LogIn
@@ -37,40 +38,37 @@ export const LogIn = ({navigation}) => {
     }
    
     return(
-        <NativeBaseProvider>
-            <Box>
-                <VStack><FormControl isRequired isInvalid={'user' in errors}>
-                        <FormControl.Label>Nombre de Usuario</FormControl.Label>
-                        <Input 
-                            placeholder='Usuario'
-                            onChangeText={(value) => setData({...data, user:value})}
-                        />
-                        {'user' in errors ?
-                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.user}</FormControl.ErrorMessage>:
-                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                        }
-                    
-                </FormControl></VStack>
-                <VStack>
-                    <FormControl isRequired isInvalid={'pass' in errors}>
-                        <FormControl.Label>Contraseña</FormControl.Label>
-                        <Input 
-                            placeholder='Contraseña'
-                            type = 'password'
-                            onChangeText={(value) => setData({...data, pass:value})}
-                        />
-                        {'pass' in errors ?
-                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.pass}</FormControl.ErrorMessage>:
-                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                        }
-                    </FormControl>
-                </VStack>
-                <Button onPress={() => navigation.navigate('rancho')}>Entrar</Button>
-            </Box>
-            <Box>
-                <Button onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>
-            </Box>
-        </NativeBaseProvider>
+        < Box justifyContent='center'  flex= {1}>
+            <VStack><FormControl isRequired isInvalid={'user' in errors}>
+                    <FormControl.Label>Nombre de Usuario</FormControl.Label>
+                    <Input 
+                        placeholder='Usuario'
+                        onChangeText={(value) => setData({...data, user:value})}
+                    />
+                    {'user' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.user}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                
+            </FormControl></VStack>
+            <VStack>
+                <FormControl isRequired isInvalid={'pass' in errors}>
+                    <FormControl.Label>Contraseña</FormControl.Label>
+                    <Input 
+                        placeholder='Contraseña'
+                        type = 'password'
+                        onChangeText={(value) => setData({...data, pass:value})}
+                    />
+                    {'pass' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.pass}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                </FormControl>
+            </VStack>
+            <Button colorScheme='success' onPress={() => navigation.navigate('rancho')}>Entrar</Button>
+            <Divider my={3}/>
+            <Button colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>
+        </Box>
     );
 }
 //Screen SignIn
@@ -116,8 +114,7 @@ export const SingIn = ({navigation}) => {
         //Comprobar el telefono 
     }
     return (
-        <NativeBaseProvider>
-
+        <Box justifyContent='center'  flex= {1}>
             <VStack><FormControl isRequired isInvalid={'user' in errors}>
                 <FormControl.Label>Nombre de Usuario (Se sugiere usar la CURP)</FormControl.Label>
                 <Input 
@@ -138,6 +135,7 @@ export const SingIn = ({navigation}) => {
                     placeholder='Contraseña'
                     onChangeText={(value) => setData(...data, {pass:value})}
                     type = 'password'
+                    
                 />
                 <Input
                     p={2}
@@ -200,7 +198,7 @@ export const SingIn = ({navigation}) => {
             </FormControl></VStack>
 
             <VStack><Button onPress={HandleRegister}>Registrar</Button></VStack>
-        </NativeBaseProvider>
+        </Box>
     );
 }
 //Screen Terms
@@ -221,7 +219,7 @@ var animal = {
     arete:'',
     nombre:'',
     sexo:'',
-    fecha:new Date(moment().format('DD-MM-YYYY')),
+    fecha:new Date(),
     raza:'',
     color:'',
     predio:'',
@@ -232,140 +230,139 @@ export const Ganado = ({navigation}) => {
     const [errors, setErrors] = React.useState({})
     const user = React.useContext(UserContext)
     return (
-        <NativeBaseProvider>
-            <VStack alignItems="center" space={4}>
-                <Select
-                    selectedValue={key.type}
-                    mt={1}
-                    onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-                >
-                    <Select.Item label="Nombre" value="nombre" />
-                    <Select.Item label="Arete" value="arete" />
-                </Select>
-                <FormControl isInvalid={'search' in errors}>
-                    <FormControl.Label>Busqueda</FormControl.Label>
-                        <Input 
-                            placeholder={key.type}
-                            onChangeText={(value) => setkey({...key, word:value})}
-                        />
-                        {'key' in errors ?
-                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
-                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                        }
-                </FormControl>
-                <Button >Buscar</Button>
-            </VStack>
+        <ScrollView>
+            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
+                <VStack alignItems="center" space={4}>
+                    <FormControl isInvalid={'search' in errors}>
+                        <FormControl.Label>Busqueda</FormControl.Label>
+                            <Select
+                                selectedValue={key.type}
+                                mt={1}
+                                onValueChange={(itemValue) => setKey({...key, type:itemValue})}
+                            >
+                                <Select.Item label="Nombre" value="nombre" />
+                                <Select.Item label="Arete" value="arete" />
+                            </Select>
+                    
+                            <Input 
+                                placeholder={key.type}
+                                onChangeText={(value) => setkey({...key, word:value})}
+                            />
+                            {'key' in errors ?
+                            <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
+                                <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                            }
+                            <Button colorScheme="teal" >Buscar</Button>
+                    </FormControl>
+                </VStack>
+            </Box>
+            <Divider my={5} />
+            <Box>
+                <VStack><FormControl isInvalid={'arete' in errors}>
+                    <FormControl.Label>Arete</FormControl.Label>
+                    <Input
+                        placeholder={data.arete}
+                        //onChangeText = {(value) => setData({...data, arete:value})}
+                    />
+                    {'arete' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.arete}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                </FormControl></VStack>
+
+                <VStack><FormControl isInvalid={'nombre' in errors}>
+                    <FormControl.Label>Nombre</FormControl.Label>
+                    <Input
+                        placeholder={data.nombre}
+                        onChangeText = {(value) => setData({...data, nombre:value})}
+                    />
+                    {'nombre' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.nombre}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                </FormControl></VStack>
+
+                <VStack><FormControl isInvalid={'sexo' in errors}>
+                    <FormControl.Label>Sexo</FormControl.Label>
+                        <Radio.Group
+
+                        name="sexo"
+                        accessibilityLabel="sexo"
+                        value={data.sexo}
+                        onChange={(nextValue) => {
+                            setData({...data, sexo:nextValue})
+                        }}
+                        >
+                            <Radio value="M" my={1}>
+                                Masculino
+                            </Radio>
+                            <Radio value="F" my={1}>
+                                Femenino
+                            </Radio>
+                        </Radio.Group>
+                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.sexo}</FormControl.ErrorMessage>
+                </FormControl></VStack>
+
+                <VStack>
+                    <DateTimePicker value={data.fecha} onChange={(event, selectedDate) => setData({...data, fecha:selectedDate})} />
+                </VStack>
+
+                <VStack><FormControl isInvalid={'raza' in errors}>
+                    <FormControl.Label>Raza</FormControl.Label>
+                    <Input
+                        placeholder={data.raza}
+                        onChangeText = {(value) => setData({...data, raza:value})}
+                    />
+                    {'raza' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.raza}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                </FormControl></VStack>
 
 
-            <VStack><FormControl isInvalid={'arete' in errors}>
-                <FormControl.Label>Arete</FormControl.Label>
-                <Input
-                    placeholder={data.arete}
-                    //onChangeText = {(value) => setData({...data, arete:value})}
-                />
-                {'arete' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.arete}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
+                <VStack><FormControl isInvalid={'color' in errors}>
+                    <FormControl.Label>Color</FormControl.Label>
+                    <Input
+                        placeholder={data.color}
+                        onChangeText = {(value) => setData({...data, color:value})}
+                    />
+                    {'color' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.color}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                </FormControl></VStack>
 
 
-            <VStack><FormControl isInvalid={'nombre' in errors}>
-                <FormControl.Label>Nombre</FormControl.Label>
-                <Input
-                    placeholder={data.nombre}
-                    onChangeText = {(value) => setData({...data, nombre:value})}
-                />
-                {'nombre' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.nombre}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
+                <VStack><FormControl isInvalid={'predio' in errors}>
+                    <FormControl.Label>Predio</FormControl.Label>
+                    <Input
+                        placeholder={data.predio}
+                        onChangeText = {(value) => setData({...data, predio:value})}
+                    />
+                    {'predio' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.predio}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                </FormControl></VStack>
 
-
-            <VStack><FormControl isInvalid={'sexo' in errors}>
-                <FormControl.Label>Sexo</FormControl.Label>
-                <Radio.Group
-                name="sexo"
-                accessibilityLabel="sexo"
-                value={data.sexo}
-                onChange={(nextValue) => {
-                    setData({...data, sexo:nextValue})
-                }}
-                >
-                    <Radio value="M" my={1}>
-                        Masculino
-                    </Radio>
-                    <Radio value="F" my={1}>
-                        Femenino
-                    </Radio>
-                </Radio.Group>
-                {'sexo' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.sexo}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-
-
-            <VStack><FormControl isInvalid={'fecha' in errors}>
-                <FormControl.Label>Fecha</FormControl.Label>
-                <DatePicker selected={data.fecha} onChange={(date) => setData({...data, fecha:date})} />
-                {'fecha' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-
-
-            <VStack><FormControl isInvalid={'raza' in errors}>
-                <FormControl.Label>Raza</FormControl.Label>
-                <Input
-                    placeholder={data.raza}
-                    onChangeText = {(value) => setData({...data, raza:value})}
-                />
-                {'raza' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.raza}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-
-
-            <VStack><FormControl isInvalid={'color' in errors}>
-                <FormControl.Label>Color</FormControl.Label>
-                <Input
-                    placeholder={data.color}
-                    onChangeText = {(value) => setData({...data, color:value})}
-                />
-                {'color' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.color}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-
-
-            <VStack><FormControl isInvalid={'predio' in errors}>
-                <FormControl.Label>Predio</FormControl.Label>
-                <Input
-                    placeholder={data.predio}
-                    onChangeText = {(value) => setData({...data, predio:value})}
-                />
-                {'predio' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.predio}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-            <VStack>
-                <Button>Crear</Button>
-                <Button>Actualizar</Button>
-                <Button>Eliminar</Button>
-            </VStack>
-            <VStack>
-                <Button>Control Sanitario</Button>
-                <Button>Control Reproductivo</Button>
-                <Button>Vacunas</Button>
-                <Button>Pesajes</Button>
-            </VStack>
-        </NativeBaseProvider>
+                <Center>
+                <Divider my={1}/>
+                <Button.Group > 
+                    <Button colorScheme="success">Crear</Button>
+                    <Button colorScheme="warning">Actualizar</Button>
+                    <Button colorScheme="danger">Eliminar</Button>
+                </Button.Group>
+                </Center>
+                <Divider my={2}/>
+                <Button.Group colorScheme="info" direction="column" variant="outline">
+                    <Button >Registro de vacunación</Button>
+                    <Button >Control Reproductivo</Button>
+                    <Button >Historial de pesajes</Button>
+                    <Button >Control Sanitario</Button>
+                </Button.Group>
+                
+            </Box>
+        </ScrollView>
     );
 }
 //Screen Vacunas
