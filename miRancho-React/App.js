@@ -28,18 +28,17 @@ const Rancho = ({navigation}) => {
   return (
     <NavRancho.Navigator initialRouteName="Ganado">
         <NavRancho.Screen name='Ganado' component={screens.Ganado}/>
-        
+        <NavRancho.Screen name='Vacunas' component={screens.Vacunas}/>
+        <NavRancho.Screen name='Controles sanitarios' component={screens.ControlSan}/>
+        <NavRancho.Screen name='Controles reproductivos' component={screens.ControlRep}/>
+        <NavRancho.Screen name='Pesajes' component={screens.Pesaje}/>
+        <NavRancho.Screen name='Predios' component={screens.Predio}/>
+        <NavRancho.Screen name='Embarques' component={screens.Embarques}/>
+        <NavRancho.Screen name='Configuración' component={screens.Configuracion}/>
     </NavRancho.Navigator>
   );
 }
-/*
-<NavRancho.Screen name='vacunas' component={screens.Vacunas}/>
-        <NavRancho.Screen name='ctlSanitario' component={screens.ControlSan}/>
-        <NavRancho.Screen name='embarazo' component={screens.ControlRep}/>
-        <NavRancho.Screen name='pesaje' component={screens.Pesaje}/>
-        <NavRancho.Screen name='predios' component={screens.Predio}/>
-        <NavRancho.Screen name='configuracion' component={screens.Configuracion}/>
-*/
+
 export default function App() {
   const [user, setUser] = useState(null);
   const providerValue = useMemo(()=> ({user,setUser}), [user,setUser]);
@@ -49,8 +48,8 @@ export default function App() {
         <NavigationContainer>
           <NativeBaseProvider>
           <NavLogin.Navigator screenOptions={{headerShown: false}}>
-            <NavMain.Screen name='inicio' component={Inicio} />
             <NavMain.Screen name='rancho' component={Rancho} />
+            <NavMain.Screen name='inicio' component={Inicio} />
           </NavLogin.Navigator>
           </NativeBaseProvider>
         </NavigationContainer>

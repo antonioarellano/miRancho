@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Switch, Select, Radio, ScrollView, Divider, Center, Container, Flex} from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Switch, Select, Radio, ScrollView, Divider, Center, Text} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from './UserContext';
 import moment from 'moment'
@@ -302,10 +302,12 @@ export const Ganado = ({navigation}) => {
                         </Radio.Group>
                         <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.sexo}</FormControl.ErrorMessage>
                 </FormControl></VStack>
-
-                <VStack>
+                
+                <VStack><FormControl isInvalid={'fecha' in errors}>
+                    <FormControl.Label>Fecha de nacimiento</FormControl.Label>
                     <DateTimePicker value={data.fecha} onChange={(event, selectedDate) => setData({...data, fecha:selectedDate})} />
-                </VStack>
+                    <FormControl.ErrorMessage>{errors.fecha}</FormControl.ErrorMessage>
+                </FormControl></VStack>
 
                 <VStack><FormControl isInvalid={'raza' in errors}>
                     <FormControl.Label>Raza</FormControl.Label>
@@ -372,37 +374,36 @@ var vacuna = {
     fecha: new Date(),
 }
 export const Vacunas = ({navigation }) => {
-    const [key, setKey] = React.useState({type:'arete',word:''})
+    const [key, setKey] = React.useState({type:'nombre',word:''})
     const [data,setData] = React.useState(vacuna)
     const [errors, setErrors] = React.useState({})
     const user = React.useContext(UserContext)
     return (
-        <NativeBaseProvider>
-
-
-            <VStack alignItems="center" space={4}>
-                <Select
-                    selectedValue={key.type}
-                    placeholder="Busqueda"
-                    mt={1}
-                    onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-                >
-                    <Select.Item label="Nombre" value="nombre" />
-                    <Select.Item label="Fecha" value="fecha" />
-                </Select>
+        <ScrollView>
+            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
                 <FormControl>
                     <FormControl.Label>Busqueda</FormControl.Label>
-                        <Input 
-                            placeholder={key}
-                            onChangeText={(value) => setkey({...key, word:value})}
-                        />
-                        {'key' in errors ?
-                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
-                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                        }
+                    <Select
+                        selectedValue={key.type}
+                        placeholder={key.type}
+                        mt={1}
+                        onValueChange={(itemValue) => setKey({...key, type:itemValue})}
+                    >   
+                        <Select.Item label="Nombre" value="nombre" />
+                        <Select.Item label="Codigo" value="codigo" />
+                    </Select>
+                
+                    <Input 
+                        placeholder={key.type}
+                        onChangeText={(value) => setkey({...key, word:value})}
+                    />
+                    {'key' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
                 </FormControl>
-                <Button >Buscar</Button>
-            </VStack>
+                <Button colorScheme='teal'>Buscar</Button>
+            </Box>
 
             <VStack><FormControl isInvalid={'codigo' in errors}>
                 <FormControl.Label>Codigo</FormControl.Label>
@@ -411,28 +412,32 @@ export const Vacunas = ({navigation }) => {
                     onChangeText={(value) => setData({...data, codigo:value})}
                 />
             </FormControl></VStack>
+
             <VStack><FormControl isInvalid={'nombre' in errors}>
-                <FormControl.Label>Codigo</FormControl.Label>
+                <FormControl.Label>Nombre</FormControl.Label>
                 <Input
                     placeholder='Nombre'
                     onChangeText={(value) => setData({...data, nombre:value})}
                 />
             </FormControl></VStack>
-            <VStack><FormControl isInvalid={'fecha' in errors}>
-                <FormControl.Label>Fecha</FormControl.Label>
-                <DatePicker selected={data.fecha} onChange={(date) => setData({...data, fecha:date})} />
-                {'fecha' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-            <VStack>
-                <Button>Crear</Button>
-                <Button>Actualizar</Button>
-                <Button>Borrar</Button>
-            </VStack>
 
-        </NativeBaseProvider>
+            <VStack><FormControl isInvalid={'fecha' in errors}>
+                <FormControl.Label>Fecha de aplicación</FormControl.Label>
+                <DateTimePicker value={data.fecha} onChange={(event,currentDate) => setData({...data, fecha:currentDate})} />
+                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>
+            </FormControl></VStack>
+            <Button colorScheme='info' variant='outline'>Ver hato vacunado</Button>
+            <Divider my={1}/>
+            <Center>
+                <Button.Group>
+                    <Button colorScheme='success'>Crear</Button>
+                    <Button colorScheme='warning'>Actualizar</Button>
+                    <Button colorScheme='danger'>Borrar</Button>
+                </Button.Group>
+            </Center>
+            
+            
+        </ScrollView>
     );
 
 }
@@ -449,62 +454,60 @@ export const ControlSan = ({navigation}) =>{
     const [errors, setErrors] = React.useState({})
     const user = React.useContext(UserContext)
     return (
-        <NativeBaseProvider>
-
-            <VStack alignItems="center" space={4}>
-                <Select
-                    selectedValue={key.type}
-                    minWidth="200"
-                    placeholder="Busqueda"
-                    mt={1}
-                    onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-                >
-                    <Select.Item label="Nombre" value="nombre" />
-                    <Select.Item label="Fecha" value="fecha" />
-                </Select>
+        <ScrollView>
+            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
                 <FormControl>
                     <FormControl.Label>Busqueda</FormControl.Label>
-                        <Input 
-                            placeholder={key.type}
-                            onChangeText={(value) => setkey({...key, word:value})}
-                        />
-                        {'key' in errors ?
-                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
-                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                        }
+                    <Select
+                        selectedValue={key.type}
+                        placeholder={key.type}
+                        mt={1}
+                        onValueChange={(itemValue) => setKey({...key, type:itemValue})}
+                    >
+                        <Select.Item label="Nombre" value="nombre" />
+                        <Select.Item label="Codigo" value="codigo" />
+                    </Select>
+                    <Input 
+                        placeholder={key.type}
+                        onChangeText={(value) => setKey({...key, word:value})}
+                    />
                 </FormControl>
-                <Button >Buscar</Button>
-            </VStack>
+                <Button colorScheme='teal'>Buscar</Button>
+            </Box>
 
-            <VStack><FormControl isInvalid={'codigo' in errors}>
-                <FormControl.Label>Codigo</FormControl.Label>
-                <Input
-                    placeholder='Codigo'
-                    onChangeText={(value) => setData({...data, codigo:value})}
-                />
-            </FormControl></VStack>
-            <VStack><FormControl isInvalid={'nombre' in errors}>
-                <FormControl.Label>Codigo</FormControl.Label>
-                <Input
-                    placeholder='Nombre'
-                    onChangeText={(value) => setData({...data, nombre:value})}
-                />
-            </FormControl></VStack>
-            <VStack><FormControl isInvalid={'fecha' in errors}>
-                <FormControl.Label>Fecha</FormControl.Label>
-                <DatePicker selected={data.fecha} onChange={(date) => setData({...data, fecha:date})} />
-                {'fecha' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-            <VStack>
-                <Button>Crear</Button>
-                <Button>Actualizar</Button>
-                <Button>Borrar</Button>
-            </VStack>
-
-        </NativeBaseProvider>
+            <Box>
+                <VStack><FormControl isInvalid={'codigo' in errors}>
+                    <FormControl.Label>Codigo</FormControl.Label>
+                    <Input
+                        placeholder='Codigo'
+                        onChangeText={(value) => setData({...data, codigo:value})}
+                    />
+                </FormControl></VStack>
+                <VStack><FormControl isInvalid={'nombre' in errors}>
+                    <FormControl.Label>Nombre</FormControl.Label>
+                    <Input
+                        placeholder='Nombre'
+                        onChangeText={(value) => setData({...data, nombre:value})}
+                    />
+                </FormControl></VStack>
+                <VStack><FormControl isInvalid={'fecha' in errors}>
+                    <FormControl.Label>Fecha de aplicación</FormControl.Label>
+                    <DateTimePicker value={data.fecha} onChange={(evente,currentDate) => setData({...data, fecha:currentDate})} />
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>
+                </FormControl></VStack>
+                <Button colorScheme='info' variant='outline'>Listar hato</Button>
+                <Divider my={1}/>
+                <Center>
+                    <Button.Group>  
+                        <Button colorScheme='success'>Crear</Button>
+                        <Button colorScheme='warning'>Actualizar</Button>
+                        <Button colorScheme='danger'>Borrar</Button>
+                    </Button.Group>
+                </Center> 
+                
+                
+            </Box>                       
+        </ScrollView>
     );
 }
 
@@ -515,61 +518,68 @@ var embarazo = {
     fin: new Date(),
 }
 export const ControlRep = ({navigation}) => {
-    <NativeBaseProvider>
-
-        <VStack alignItems="center" space={4}>
-            <Select
-                selectedValue={key.type}
-                minWidth="200"
-                placeholder="Busqueda"
-                mt={1}
-                onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-            >
-                <Select.Item label="Arete" value="codigo" />
-                <Select.Item label="Fecha" value="fecha" />
-            </Select>
-            <FormControl>
-                <FormControl.Label>Busqueda</FormControl.Label>
+    const [key, setKey] = React.useState({type:'codigo',word:''})
+    const [data,setData] = React.useState(embarazo)
+    const [errors, setErrors] = React.useState({})
+    const user = React.useContext(UserContext)
+    return(
+        <ScrollView>
+            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
+                <FormControl>
+                    <FormControl.Label>Busqueda</FormControl.Label>
+                    <Select
+                        selectedValue={key.type}
+                        placeholder="Busqueda"
+                        mt={1}
+                        onValueChange={(itemValue) => setKey({...key, type:itemValue})}
+                    >
+                        <Select.Item label="Codigo" value="codigo" />
+                        <Select.Item label="Fecha" value="fecha" />
+                    </Select>
+                
                     <Input 
-                        placeholder={key}
+                        placeholder={key.type}
                         onChangeText={(value) => setkey({...key, word:value})}
                     />
                     {'key' in errors ?
                     <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
                         <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                     }
-            </FormControl>
-            <Button >Buscar</Button>
-        </VStack>
+                </FormControl>
+                <Button colorScheme='teal'>Buscar</Button>
+            </Box>
 
-        <VStack><FormControl isInvalid={'codigo' in errors}>
-            <FormControl.Label>Codigo</FormControl.Label>
-            <Label value={data.codigo}/>
-        </FormControl></VStack>
+            <VStack><FormControl isInvalid={'codigo' in errors}>
+                <FormControl.Label>Codigo</FormControl.Label>
+                <Input 
+                    value={data.codigo}
+                    onChangeText={(value) => {setData({...data, codigo:value})}}
+        
+                />
+                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.codigo}</FormControl.ErrorMessage>
+            </FormControl></VStack>
 
-        <VStack><FormControl isInvalid={'inicio' in errors}>
-            <FormControl.Label>Fecha de inicio</FormControl.Label>
-            <DatePicker selected={data.inicio} onChange={(date) => setData({...data, inicio:date})} />
-            {'inicio' in errors ?
-            <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.inicio}</FormControl.ErrorMessage>:
-                <FormControl.HelperText _text={{fontSize: 'xs'}}>Verificar fecha</FormControl.HelperText>
-            }
-        </FormControl></VStack>
+            <VStack><FormControl isInvalid={'inicio' in errors}>
+                <FormControl.Label>Fecha de inicio</FormControl.Label>
+                <DateTimePicker value={data.inicio} onChange={(event, currentDate) => setData({...data, inicio:currentDate})} />
+                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.inicio}</FormControl.ErrorMessage>
+            </FormControl></VStack>
 
-        <VStack><FormControl isInvalid={'fin' in errors}>
-            <FormControl.Label>Fecha de fin</FormControl.Label>
-            <DatePicker selected={data.fecha} onChange={(date) => setData({...data, fin:date})} />
-            {'fin' in errors ?
-            <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fin}</FormControl.ErrorMessage>:
-                <FormControl.HelperText _text={{fontSize: 'xs'}}>Verificar fecha</FormControl.HelperText>
-            }
-        </FormControl></VStack>
-        <VStack>
-            <Button>Crear</Button>
-            <Button>Actualizar</Button>
-            <Button>Borrar</Button>
-        </VStack>
-    </NativeBaseProvider>
+            <VStack><FormControl isInvalid={'fin' in errors}>
+                <FormControl.Label>Fecha de fin</FormControl.Label>
+                <DateTimePicker value={data.fin} onChange={(event, currentDate) => setData({...data, fin:currentDate})} />
+                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fin}</FormControl.ErrorMessage>
+            </FormControl></VStack>
+            <Center>
+                <Button.Group>
+                    <Button colorScheme='success'>Crear</Button>
+                    <Button colorScheme='warning'>Actualizar</Button>
+                    <Button colorScheme='danger'>Borrar</Button>
+                </Button.Group>
+            </Center>
+
+        </ScrollView>
+    );
 }
 
 //Screen Pesajes
@@ -581,24 +591,86 @@ var peso = {
     kg:0.0,
 }
 export const Pesaje = ({navigation}) => {
-    const [key, setKey] = React.useState({type:'nombre',word:''})
-    const [data,setData] = React.useState(ctlSanitario)
+    const [key, setKey] = React.useState({type:'Peso',word:''})
+    const [data,setData] = React.useState(peso)
     const [errors, setErrors] = React.useState({})
     const user = React.useContext(UserContext)
     return (
-        <NativeBaseProvider>
+        <ScrollView>
+            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
+                <FormControl>
+                    <FormControl.Label>Busqueda</FormControl.Label>
+                    <Select
+                        selectedValue={key.type}
+                        placeholder={key.type}
+                        onValueChange={(itemValue) => setKey({...key, type:itemValue})}
+                    >
+                        <Select.Item label="Peso" value="peso" />
+                        <Select.Item label="Fecha" value="fecha" />
+                    </Select>
+                    <Input 
+                        placeholder={key.type}
+                        onChangeText={(value) => setkey({...key, word:value})}
+                    />
+                    {'key' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                </FormControl>
+                <Button colorScheme='teal'>Buscar</Button>
+            </Box>
 
-            <VStack alignItems="center" space={4}>
-                <Select
-                    selectedValue={key.type}
-                    minWidth="200"
-                    placeholder="Busqueda"
-                    mt={1}
-                    onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-                >
-                    <Select.Item label="Peso" value="peso" />
-                    <Select.Item label="Fecha" value="fecha" />
-                </Select>
+            <VStack><FormControl isInvalid={'codigo' in errors}>
+                <FormControl.Label>Codigo</FormControl.Label>
+                <Input value={data.codigo} onChangeText={(value)=>setData({...data, codigo:value})}/>
+            </FormControl></VStack>
+            <VStack><FormControl isInvalid={'arete' in errors}>
+                <FormControl.Label>Arete</FormControl.Label>
+                <Input
+                    placeholder='Arete'
+                    onChangeText={(value) => setData({...data, arete:value})}
+                />
+            </FormControl></VStack>
+            <VStack><FormControl isInvalid={'fecha' in errors}>
+                <FormControl.Label>Fecha</FormControl.Label>
+                <DateTimePicker value={data.fecha} onChange={(event,currentDate) => setData({...data, fecha:currentDate})} />
+                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>
+            </FormControl></VStack>
+            <VStack><FormControl isInvalid={'peso' in errors}>
+                <FormControl.Label>Peso</FormControl.Label>
+                <Input
+                    placeholder='Peso'
+                    keyboardType='numeric'
+                    onChangeText={(value) => setData({...data, peso:value})}
+                />
+            </FormControl></VStack>
+            <Center>
+            <Button.Group>
+                    <Button colorScheme='success'>Crear</Button>
+                    <Button colorScheme='warning'>Actualizar</Button>
+                    <Button colorScheme='danger'>Borrar</Button>
+            </Button.Group>
+            </Center>
+
+        </ScrollView>
+    );
+}
+
+//Screen Predios
+var predio = {
+    nombre:'',
+    extension: 0.0,
+    agua: false,
+    pasto: false,
+}
+export const Predio = ( {navitagion}) => {
+    const [key, setKey] = React.useState({type:'nombre',word:''})
+    const [data,setData] = React.useState(predio)
+    const [errors, setErrors] = React.useState({})
+    const user = React.useContext(UserContext)
+    return (
+        <ScrollView>
+            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
                 <FormControl>
                     <FormControl.Label>Busqueda</FormControl.Label>
                         <Input 
@@ -610,75 +682,8 @@ export const Pesaje = ({navigation}) => {
                             <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                         }
                 </FormControl>
-                <Button >Buscar</Button>
-            </VStack>
-
-            <VStack><FormControl isInvalid={'codigo' in errors}>
-                <FormControl.Label>Codigo</FormControl.Label>
-                <Label value={data.codigo}/>
-            </FormControl></VStack>
-            <VStack><FormControl isInvalid={'arete' in errors}>
-                <FormControl.Label>Arete</FormControl.Label>
-                <Input
-                    placeholder='Arete'
-                    onChangeText={(value) => setData({...data, arete:value})}
-                />
-            </FormControl></VStack>
-            <VStack><FormControl isInvalid={'fecha' in errors}>
-                <FormControl.Label>Fecha</FormControl.Label>
-                <DatePicker selected={data.fecha} onChange={(date) => setData({...data, fecha:date})} />
-                {'fecha' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-            <VStack><FormControl isInvalid={'peso' in errors}>
-                <FormControl.Label>Peso</FormControl.Label>
-                <Input
-                    placeholder='Peso'
-                    keyboardType='numeric'
-                    onChangeText={(value) => setData({...data, peso:value})}
-                />
-            </FormControl></VStack>
-            <VStack>
-                <Button>Crear</Button>
-                <Button>Actualizar</Button>
-                <Button>Borrar</Button>
-            </VStack>
-
-        </NativeBaseProvider>
-    );
-}
-
-//Screen Predios
-var predio = {
-    nombre:'',
-    extension: 0.0,
-    agua: true,
-    pasto: true,
-}
-export const Predio = ( {navitagion}) => {
-    const [key, setKey] = React.useState({type:'nombre',word:''})
-    const [data,setData] = React.useState(vacuna)
-    const [errors, setErrors] = React.useState({})
-    const user = React.useContext(UserContext)
-    return (
-        <NativeBaseProvider>
-
-            <VStack alignItems="center" space={4}>
-                <FormControl>
-                    <FormControl.Label>Nombre</FormControl.Label>
-                        <Input 
-                            placeholder={key.type}
-                            onChangeText={(value) => setkey({...key, word:value})}
-                        />
-                        {'key' in errors ?
-                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
-                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                        }
-                </FormControl>
-                <Button >Buscar</Button>
-            </VStack>
+                <Button colorScheme='teal'>Buscar</Button>
+            </Box>
 
             <VStack><FormControl isInvalid={'nombre' in errors}>
                 <FormControl.Label>Nombre</FormControl.Label>
@@ -692,22 +697,30 @@ export const Predio = ( {navitagion}) => {
                 <Input
                     placeholder='Extension en hectareas'
                     onChangeText={(value) => setData({...data, extension:value})}
+                    keyboardType='numeric'
                 />
             </FormControl></VStack>
-            <VStack>
-                <Switch onToggle={()=> setData({...data, agua:!agua})}/>
-            </VStack>
-            <VStack>
-                <Switch onToggle={()=> setData({...data, pasto:!pasto})}/>
-            </VStack>
-            <VStack>
-                <Button>Crear</Button>
-                <Button>Actualizar</Button>
-                <Button>Borrar</Button>
-            </VStack>
+            <Divider my={1}/>
+            <Checkbox value={data.agua} size='md' onChange={(value) => setData({...data, agua:value})}>Disponibilidad de agua</Checkbox>
+            <Divider my={1}/>
+            <Checkbox value={data.pasto} size='md' onChange={(value) => setData({...data, pasto:value})}>Disponibilidad de pasto</Checkbox>
+            <Divider my={1}/>
+            <Button colorScheme='info' variant='outline' >Listar hato en el predio</Button>
+            <Divider my={1}/>
+            <Center>
+                <Button.Group>
+                    <Button colorScheme='success'>Crear</Button>
+                    <Button colorScheme='warning'>Actualizar</Button>
+                    <Button colorScheme='danger'>Borrar</Button>
+                </Button.Group>
+            </Center>
 
-        </NativeBaseProvider>
+        </ScrollView>
     );
+}
+//Screen Embarques
+export const Embarques = ({navigation}) => {
+
 }
 //Screen Configuracion
 export const Configuracion = ({navigation}) => {
