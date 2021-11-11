@@ -1,9 +1,9 @@
 import React from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Switch, Select, Radio, ScrollView, Divider, Center, Text} from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Switch, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from './UserContext';
-import moment from 'moment'
-import { backgroundColor } from 'styled-system';
+
+
 // Navegacion de Inicio //
 
 //Screen LogIn
@@ -723,6 +723,100 @@ export const Embarques = ({navigation}) => {
 
 }
 //Screen Configuracion
+export const setConfig = ({route, navigation}) => {
+    const {type, data} = route.params;
+    const [ndata, setData] = React.useState({})
+    switch(type){
+        case 'Usuario':
+            return(
+                <Box>
+                    <FormControl>
+                        <FormControl.Label>Establecer nuevo</FormControl.Label>
+                        <Input placeholder = {type} value={ndata} onChangeText = {(value) => setData(value)}/>
+                    </FormControl>
+                    <Button colorScheme='warning'>Actualizar</Button>
+                </Box>
+            );
+            break;
+        case 'Nombre':
+            return(
+                <Box>
+                    <FormControl>
+                        <FormControl.Label>Establecer nuevo</FormControl.Label>
+                        <Input placeholder = {type} value={ndata} onChangeText = {(value) => setData(value)}/>
+                    </FormControl>
+                    <Button colorScheme='warning'>Actualizar</Button>
+                </Box>
+            );
+            break;
+        case 'Contraseña':
+            const [cpass, setPass] = React.useState('')
+            return(
+                <Box>
+                    <FormControl>
+                        <FormControl.Label>Establecer nueva</FormControl.Label>
+                        <Input placeholder = {type} type='password' value={ndata} onChangeText = {(value) => setData(value)}/>
+                        <Input placeholder = 'Confirmar' type='password' value={cpass} onChangeText = {(value) => setPass(value)}/>
+                    </FormControl>
+                    <Button colorScheme='warning'>Actualizar</Button>
+                </Box>
+            );
+            break;
+        case 'Dirección':
+            return(
+                <Box>
+                    <FormControl>
+                        <FormControl.Label>Establecer nueva</FormControl.Label>
+                        <Input placeholder = {type} value={ndata} onChangeText = {(value) => setData(value)}/>
+                    </FormControl>
+                    <Button colorScheme='warning'>Actualizar</Button>
+                </Box>
+            );
+            break;
+        case 'Teléfono':
+            return(
+                <Box>
+                    <FormControl>
+                        <FormControl.Label>Establecer nuevo</FormControl.Label>
+                        <Input placeholder = {type} keyboardType='numeric' value={ndata} onChangeText = {(value) => setData(value)}/>
+                    </FormControl>
+                    <Button colorScheme='warning'>Actualizar</Button>
+                </Box>
+            );
+            break;
+    }
+}
+var perfil = [
+    {type:'Usuario',data:'a'},
+    {type:'Nombre',data:'n'},
+    {type:'Contraseña',data:''},
+    {type:'Dirección',data:'s'},
+    {type:'Teléfono',data:0},
+]
 export const Configuracion = ({navigation}) => {
-
+    //cargar perfil
+    const [params, setParams] = React.useState(perfil);
+        // user,name,pass,cpass,address, phone.
+    const [errors, setError] = React.useState({});
+ 
+    return (
+        <Box >
+            <Box bgColor='#DEDDDA'>
+                <Center>
+                    <Heading size='sm'>Actualizar datos</Heading>
+                </Center>
+            </Box>
+            <FlatList
+                data={params}
+                renderItem={({item}) => (
+                    <VStack>
+                        <Button colorScheme='teal' variant='ghost' onPress = {()=>{navigation.navigate('setConfig',{type:item.type, data:item.data})}}>{item.type}</Button>
+                        <Text>{item.data}</Text>
+                        <Divider my={1}/>
+                    </VStack>
+                    
+                )}
+            />
+        </Box>
+    );
 }

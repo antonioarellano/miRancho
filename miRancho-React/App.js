@@ -11,6 +11,7 @@ import * as screens from './screens';
 import { UserContext } from './UserContext';
 
 const NavLogin = createNativeStackNavigator();
+const NavConfig = createNativeStackNavigator();
 const NavRancho = createDrawerNavigator();
 const NavMain = createNativeStackNavigator();
 
@@ -24,6 +25,14 @@ const Inicio = ({navigation}) => {
     </NavLogin.Navigator>
   );
 }
+const Configuracion = ({navigation}) => {
+  return (
+    <NavConfig.Navigator >
+      <NavConfig.Screen options={{headerShown: false}} name='Configuración' component={screens.Configuracion}/>
+      <NavConfig.Screen options={{title: ''}}name='setConfig' component={screens.setConfig}/>
+    </NavConfig.Navigator>
+  );
+}
 const Rancho = ({navigation}) => {
   return (
     <NavRancho.Navigator initialRouteName="Ganado">
@@ -34,7 +43,7 @@ const Rancho = ({navigation}) => {
         <NavRancho.Screen name='Pesajes' component={screens.Pesaje}/>
         <NavRancho.Screen name='Predios' component={screens.Predio}/>
         <NavRancho.Screen name='Embarques' component={screens.Embarques}/>
-        <NavRancho.Screen name='Configuración' component={screens.Configuracion}/>
+        <NavRancho.Screen name='Configuración' component={Configuracion}/>
     </NavRancho.Navigator>
   );
 }
