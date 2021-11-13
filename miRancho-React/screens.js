@@ -1,8 +1,8 @@
-import React from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Switch, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading} from 'native-base';
+import React, { Component } from 'react';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,View, Container} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from './UserContext';
-
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Navegacion de Inicio //
 
@@ -67,6 +67,7 @@ export const LogIn = ({navigation}) => {
             </VStack>
             <Button colorScheme='success' onPress={() => navigation.navigate('rancho')}>Entrar</Button>
             <Divider my={3}/>
+            <Button colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('recPass')}>Olvide mi contraseña</Button>
             <Button colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>
         </Box>
     );
@@ -76,7 +77,7 @@ export const SingIn = ({navigation}) => {
     const [data, setData] = React.useState({});
         // user,name,pass,cpass,address, phone, terms.
     const [errors, setError] = React.useState({});
- 
+    
     const HandleRegister = () => {
         if (data.user === undefined ) {
             setError(...errors, {user:'Se necesita usuario'})
@@ -114,13 +115,15 @@ export const SingIn = ({navigation}) => {
         //Comprobar el telefono 
     }
     return (
+        <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
+        <ScrollView>
         <Box justifyContent='center'  flex= {1}>
             <VStack><FormControl isRequired isInvalid={'user' in errors}>
                 <FormControl.Label>Nombre de Usuario (Se sugiere usar la CURP)</FormControl.Label>
                 <Input 
                     p={2} 
                     placeholder='Usuario'
-                    onChangeText={(value) => setData(...data, {user: value})}
+                    onChangeText={(value) => {setData(...data, {user: value})}}
                 />
                 {'user' in errors ?
                 <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.user}</FormControl.ErrorMessage>:
@@ -133,14 +136,14 @@ export const SingIn = ({navigation}) => {
                 <Input 
                     p={2} 
                     placeholder='Contraseña'
-                    onChangeText={(value) => setData(...data, {pass:value})}
+                    onChangeText={(value) => {setData(...data, {pass:value})}}
                     type = 'password'
                     
                 />
                 <Input
                     p={2}
                     placeholder='Confirmar contraseña'
-                    onChangeText={(value)=> setData(...data, {cpass:value})}
+                    onChangeText={(value)=> {setData(...data, {cpass:value})}}
                     type = 'password'
                 />
                 {'pass' in errors ?
@@ -154,7 +157,7 @@ export const SingIn = ({navigation}) => {
                 <Input 
                     p={2} 
                     placeholder='Nombre'
-                    onChangeText={(value) => setData(...data, {name:value})}
+                    onChangeText={(value) => {setData(...data, {name:value})}}
                 />
                 {'name' in errors ?
                 <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.name}</FormControl.ErrorMessage>:
@@ -167,7 +170,7 @@ export const SingIn = ({navigation}) => {
             <Input 
                 p={2} 
                 placeholder='Domicilio'
-                onChangeText={(value) => setData(...data, {address:value})}
+                onChangeText={(value) => {setData(...data, {address:value})}}
             />
 
             {'address' in errors ?
@@ -180,6 +183,7 @@ export const SingIn = ({navigation}) => {
                 <FormControl.Label>Teléfono</FormControl.Label>
                 <Input 
                     p={2} 
+                    keyboardType='phone-pad'
                     placeholder='Teléfono'
                     onChangeText={(value) => setData(...data, {phone:value})}
                 />
@@ -190,15 +194,17 @@ export const SingIn = ({navigation}) => {
             </FormControl></VStack>
 
             <VStack><FormControl isRequired isInvalid={'terms' in errors}>
-                <Checkbox onChange={() => setData(...data, {terms:value})}>
+                <Checkbox onChange={() => {setData(...data, {terms:value})}}>
                     Aceptar  
                     <Link onPress={()=>navigation.navigate('terms')}> terminos y condiciones de uso</Link>
                 </Checkbox>
                     
             </FormControl></VStack>
-
-            <VStack><Button onPress={HandleRegister}>Registrar</Button></VStack>
+            <Divider my={2}/>
+            <Button colorScheme='success' onPress={HandleRegister}>Registrar</Button>
         </Box>
+        </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 //Screen Terms
@@ -211,7 +217,25 @@ export const Terms = ({navigation}) => {
         </NativeBaseProvider>
     );
 }
-
+//Screen recoverPass
+export const RecPass = ({navigation}) => {
+    const [data,setData] = React.useState('');
+    return(
+        <Box>
+            <FormControl>
+                <FormControl.Label>Ingrese su usuario</FormControl.Label>
+                <Input placeholder = 'Usuario' value = {data} onChangeText= {(value)=>setData(value)}/>
+            </FormControl>
+            <Button colorScheme='success'>Restablecer contraseña</Button>
+        </Box>
+    );
+}
+ 
+//Screen verPhone
+export const verPhone = ({route,navigation}) => {
+    const [phone, setPhone] = useState(route.params)
+    return 
+}
 // Navegacion "Rancho" //
 
 //Screen Ganado
@@ -230,14 +254,13 @@ export const Ganado = ({navigation}) => {
     const [errors, setErrors] = React.useState({})
     const user = React.useContext(UserContext)
     return (
-        <ScrollView>
-            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
-                <VStack alignItems="center" space={4}>
+        <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
+            <ScrollView >
+                <Box alignItems="center" bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
                     <FormControl isInvalid={'search' in errors}>
                         <FormControl.Label>Busqueda</FormControl.Label>
                             <Select
                                 selectedValue={key.type}
-                                mt={1}
                                 onValueChange={(itemValue) => setKey({...key, type:itemValue})}
                             >
                                 <Select.Item label="Nombre" value="nombre" />
@@ -254,10 +277,11 @@ export const Ganado = ({navigation}) => {
                             }
                             <Button colorScheme="teal" >Buscar</Button>
                     </FormControl>
-                </VStack>
-            </Box>
-            <Divider my={5} />
-            <Box>
+                </Box>
+                <Divider my={1} />
+
+           
+                <Box>
                 <VStack><FormControl isInvalid={'arete' in errors}>
                     <FormControl.Label>Arete</FormControl.Label>
                     <Input
@@ -346,8 +370,9 @@ export const Ganado = ({navigation}) => {
                         <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                     }
                 </FormControl></VStack>
-
+                
                 <Center>
+                
                 <Divider my={1}/>
                 <Button.Group > 
                     <Button colorScheme="success">Crear</Button>
@@ -362,9 +387,9 @@ export const Ganado = ({navigation}) => {
                     <Button >Historial de pesajes</Button>
                     <Button >Control Sanitario</Button>
                 </Button.Group>
-                
-            </Box>
-        </ScrollView>
+                </Box>
+            </ScrollView>
+            </KeyboardAvoidingView>
     );
 }
 //Screen Vacunas
@@ -596,6 +621,7 @@ export const Pesaje = ({navigation}) => {
     const [errors, setErrors] = React.useState({})
     const user = React.useContext(UserContext)
     return (
+        <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
         <ScrollView>
             <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
                 <FormControl>
@@ -653,6 +679,7 @@ export const Pesaje = ({navigation}) => {
             </Center>
 
         </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -718,8 +745,110 @@ export const Predio = ( {navitagion}) => {
         </ScrollView>
     );
 }
-//Screen Embarques
-export const Embarques = ({navigation}) => {
+
+//Screens "Embarques"
+export const newEmbarque = ({navigation}) => {
+    const [data,setData] = React.useState({type:'pesos',vehicles:0, units:0});
+    const [getUnits, setUnits] = React.useState(false);
+    return(
+        <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
+            <FormControl>
+                <FormControl.Label>Tipo de embarque</FormControl.Label>
+                <Select
+                    selectedValue={data.type}
+                    mt={1}
+                    onValueChange={(itemValue) => {
+                        setData({...data, type:itemValue});
+                        if (itemValue=='nombre')
+                            setUnits(true);
+                        else
+                            setUnits(false);
+                    }}
+                >
+                    <Select.Item label="Agregar por nombre" value="nombre" />
+                    <Select.Item label="Agregar pesos" value="pesos" />
+                </Select>
+            </FormControl>
+            <FormControl isDisabled >
+                <FormControl.Label>Tamaño de embarque</FormControl.Label>
+                <Center>
+                    <Text>{data.units}</Text>
+                    <Slider defaultValue={data.units} size="sm" colorScheme="white" maxValue={500} onChange={(value) => {setData({...data, units:value})}} width="90%">
+                        <Slider.Track bg="white">
+                        <Slider.FilledTrack bg="black" />
+                        </Slider.Track>
+                        <Slider.Thumb borderWidth="0" bg="transparent">
+                        <Icon as={MaterialCommunityIcons} name="cow" color="black" size="sm" />
+                        </Slider.Thumb>
+                    </Slider>
+                </Center>
+            </FormControl>
+
+            <FormControl>
+                <FormControl.Label>Número de vehiculos</FormControl.Label>
+                <Center>
+                    <Text>{data.vehicles}</Text>
+                    <Slider defaultValue={data.units} size="sm" colorScheme="white" maxValue={50}onChange={(value) => {setData({...data, vehicles:value})}} width="90%">
+                        <Slider.Track bg="white">
+                        <Slider.FilledTrack bg="black" />
+                        </Slider.Track>
+                        <Slider.Thumb borderWidth="0" bg="transparent">
+                        <Icon as={MaterialCommunityIcons} name="truck" color="black" size="sm" />
+                        </Slider.Thumb>
+                    </Slider>
+                </Center>
+            </FormControl>
+            
+            <Divider my={2}/>
+            <Button colorScheme="success" onPress={()=>{navigation.navigate('setEmbarque',{type:data.type,nVehicles:data.vehicles})}}>Crear Embarque</Button>
+        </Box>
+    );
+}
+export const setEmbarque = ({route, navigation}) => {
+    const {type, nVehicles} = route.params;
+    let vehicles = Array(nVehicles);
+    for (var i=0; i<nVehicles; i++){
+        vehicles[i]={id:i+1,cap:0}; 
+    }
+    const Carga = {};
+    switch (type) {
+        case 'pesos':
+            break;
+        case 'nombre':
+        
+        break;
+    
+        default:
+            break;
+    }
+    return(
+        <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
+            <ScrollView>
+                <Box>
+                <Heading>Vehiculos</Heading>
+                <FlatList
+                    data={vehicles}
+                    renderItem={({item}) => (
+                        <VStack>
+                        <Text>{item.id}</Text>
+                        <Input placeholder='Capacidad' keyboardType='number-pad' value={item.cap} onChangeText={(value)=>{item.cap=value}} />
+                        <Divider my={1}/>
+                        </VStack>
+                    )}
+                />
+                </Box>
+                <Box>
+                    <Heading>Embarques</Heading>
+                </Box>
+            </ScrollView>
+        </KeyboardAvoidingView>
+    );
+
+}
+/*
+
+*/
+export const getEmbarque = ({navigation}) => {
 
 }
 //Screen Configuracion

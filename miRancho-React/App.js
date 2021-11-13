@@ -12,6 +12,7 @@ import { UserContext } from './UserContext';
 
 const NavLogin = createNativeStackNavigator();
 const NavConfig = createNativeStackNavigator();
+const NavEmbarque = createNativeStackNavigator();
 const NavRancho = createDrawerNavigator();
 const NavMain = createNativeStackNavigator();
 
@@ -19,10 +20,20 @@ const NavMain = createNativeStackNavigator();
 const Inicio = ({navigation}) => {
   return(          
     <NavLogin.Navigator>
-      <NavLogin.Screen name='login' component={screens.LogIn}/>
-      <NavLogin.Screen name='singin' component={screens.SingIn}/>
-      <NavLogin.Screen name='terms' component={screens.Terms}/>
+      <NavLogin.Screen options={{title: 'Mi Rancho'}} name='login' component={screens.LogIn}/>
+      <NavLogin.Screen options={{title: 'Crear cuenta'}}name='singin' component={screens.SingIn}/>
+      <NavLogin.Screen options={{title: 'Terminos y condiciones'}}name='terms' component={screens.Terms}/>
+      <NavLogin.Screen options={{title: 'Recuperar contraseña'}} name='recPass' component={screens.RecPass}/>
     </NavLogin.Navigator>
+  );
+}
+const Embarques = ({navigation}) => {
+  return (
+    <NavEmbarque.Navigator>
+      <NavEmbarque.Screen options={{headerShown: false}} name='newEmbarque' component={screens.newEmbarque}/>
+      <NavEmbarque.Screen options={{title: ''}} name='setEmbarque' component={screens.setEmbarque}/>
+      <NavEmbarque.Screen options={{title: ''}} name='getEmbarque' component={screens.getEmbarque}/>
+    </NavEmbarque.Navigator>
   );
 }
 const Configuracion = ({navigation}) => {
@@ -42,7 +53,7 @@ const Rancho = ({navigation}) => {
         <NavRancho.Screen name='Controles reproductivos' component={screens.ControlRep}/>
         <NavRancho.Screen name='Pesajes' component={screens.Pesaje}/>
         <NavRancho.Screen name='Predios' component={screens.Predio}/>
-        <NavRancho.Screen name='Embarques' component={screens.Embarques}/>
+        <NavRancho.Screen name='Embarques' component={Embarques}/>
         <NavRancho.Screen name='Configuración' component={Configuracion}/>
     </NavRancho.Navigator>
   );
@@ -57,6 +68,7 @@ export default function App() {
         <NavigationContainer>
           <NativeBaseProvider>
           <NavLogin.Navigator screenOptions={{headerShown: false}}>
+            
             <NavMain.Screen name='rancho' component={Rancho} />
             <NavMain.Screen name='inicio' component={Inicio} />
           </NavLogin.Navigator>
