@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,View, Container} from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, InputGroup} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { UserContext } from './UserContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -75,7 +75,7 @@ export const LogIn = ({navigation}) => {
 //Screen SignIn
 export const SingIn = ({navigation}) => {
     const [data, setData] = React.useState({});
-        // user,name,pass,cpass,address, phone, terms.
+        // user,name,pass,cpass,address, mail, terms.
     const [errors, setError] = React.useState({});
     
     const HandleRegister = () => {
@@ -99,8 +99,8 @@ export const SingIn = ({navigation}) => {
             setError(...errors, {address:'Se necesita domicilio'})
             return false;
         }
-        if (data.phone === undefined ) {
-            setError(...errors, {phone:'Se necesita número de celular'})
+        if (data.mail === undefined ) {
+            setError(...errors, {mail:'Se necesita cuenta de correo electrónico'})
             return false;
         }
         if (data.terms === undefined ) {
@@ -112,7 +112,7 @@ export const SingIn = ({navigation}) => {
             return false;
         }
         // Comprobar si existe el usuario
-        //Comprobar el telefono 
+        //Comprobar el correo 
     }
     return (
         <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
@@ -179,18 +179,18 @@ export const SingIn = ({navigation}) => {
                 }
             </FormControl></VStack>
             
-            <VStack><FormControl isRequired isInvalid={'phone' in errors}>
-                <FormControl.Label>Teléfono</FormControl.Label>
+            <VStack><FormControl isRequired isInvalid={'mail' in errors}>
+                <FormControl.Label>Correo electrónico</FormControl.Label>
                 <Input 
                     p={2} 
-                    keyboardType='phone-pad'
-                    placeholder='Teléfono'
-                    onChangeText={(value) => setData(...data, {phone:value})}
+                    keyboardType='email'
+                    placeholder='Correo'
+                    onChangeText={(value) => setData(...data, {mail:value})}
                 />
-                {'user' in errors ?
+                {'mail' in errors ?
                     <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.phone}</FormControl.ErrorMessage>:
                         <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                    }
+                }
             </FormControl></VStack>
 
             <VStack><FormControl isRequired isInvalid={'terms' in errors}>
@@ -230,11 +230,35 @@ export const RecPass = ({navigation}) => {
         </Box>
     );
 }
+//Screen newPass
+export const newPass = ({navigation}) => {
+    const [pass,setPass] = React.useState('');
+    const [cPass,setCpass] = React.useState('');
+    return (
+        <Box>
+            
+        </Box>
+    );
+
+}
  
-//Screen verPhone
-export const verPhone = ({route,navigation}) => {
-    const [phone, setPhone] = useState(route.params)
-    return 
+//Screen verMail
+export const verMail = ({route,navigation}) => {
+    const mail = route.params;
+    const [key, setKey] = React.useState('');
+
+    return(
+        <Box>
+            <Text>Ingrese el código de verificación enviado a:</Text>
+            <Text size='md' >{mail} </Text>
+            <Input 
+                keyboardType='numeric'
+                value = {key.toString()}
+                onChangeText = {(value) => setKey(value)}
+            />
+            <Button colorScheme='success'>Enviar</Button>
+        </Box>
+    );
 }
 // Navegacion "Rancho" //
 
@@ -750,6 +774,18 @@ export const Predio = ( {navitagion}) => {
 export const newEmbarque = ({navigation}) => {
     const [data,setData] = React.useState({type:'pesos',vehicles:0, units:0});
     const [getUnits, setUnits] = React.useState(false);
+    const handleCrear = () => {
+        switch(data.type){
+            case 'pesos':
+                navigation.navigate('setEmbarque',{nUnits:data.units,nVehicles:data.vehicles});
+                break;
+            case 'nombre':
+                navigation.navigate('setEmbarque',{nUnits:0,nVehicles:data.vehicles});
+                break;
+            default:
+                break;
+        }
+    }
     return(
         <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
             <FormControl>
@@ -773,7 +809,7 @@ export const newEmbarque = ({navigation}) => {
                 <FormControl.Label>Tamaño de embarque</FormControl.Label>
                 <Center>
                     <Text>{data.units}</Text>
-                    <Slider defaultValue={data.units} size="sm" colorScheme="white" maxValue={500} onChange={(value) => {setData({...data, units:value})}} width="90%">
+                    <Slider defaultValue={data.units} size="sm" colorScheme="white" maxValue={500} onChange={(value) => {setData({...data, units:value})}} width="85%">
                         <Slider.Track bg="white">
                         <Slider.FilledTrack bg="black" />
                         </Slider.Track>
@@ -788,7 +824,7 @@ export const newEmbarque = ({navigation}) => {
                 <FormControl.Label>Número de vehiculos</FormControl.Label>
                 <Center>
                     <Text>{data.vehicles}</Text>
-                    <Slider defaultValue={data.units} size="sm" colorScheme="white" maxValue={50}onChange={(value) => {setData({...data, vehicles:value})}} width="90%">
+                    <Slider defaultValue={data.units} size="sm" colorScheme="white" maxValue={50}onChange={(value) => {setData({...data, vehicles:value})}} width="85%">
                         <Slider.Track bg="white">
                         <Slider.FilledTrack bg="black" />
                         </Slider.Track>
@@ -800,47 +836,87 @@ export const newEmbarque = ({navigation}) => {
             </FormControl>
             
             <Divider my={2}/>
-            <Button colorScheme="success" onPress={()=>{navigation.navigate('setEmbarque',{type:data.type,nVehicles:data.vehicles})}}>Crear Embarque</Button>
+            <Button colorScheme="success" onPress={handleCrear}>Crear Embarque</Button>
         </Box>
     );
 }
 export const setEmbarque = ({route, navigation}) => {
-    const {type, nVehicles} = route.params;
-    let vehicles = Array(nVehicles);
+    const {nUnits, nVehicles} = route.params;
+    const [show, setShow] = React.useState(true)
+    const [vehicles, setVehicles] = React.useState({vehiclesInputs:[]});
+    const [units, setUnits] = React.useState({unitInputs:[]});
+    let  iUnits= [];
+    let iVehicles  = [] ;
+
     for (var i=0; i<nVehicles; i++){
-        vehicles[i]={id:i+1,cap:0}; 
+        iVehicles.push(i);  
     }
-    const Carga = {};
-    switch (type) {
-        case 'pesos':
-            break;
-        case 'nombre':
+
+    if (nUnits > 0){
+        for (var i=0; i<nUnits; i++){
+            iUnits.push(i);
+        }
+    }else{
+        //Cargar hato con su ultimo peso
+        //Seleccionar de lista
         
-        break;
-    
-        default:
-            break;
+    }
+    const setVehiculsInputs = (value,index) => {
+        let { vehiclesInputs } = vehicles;
+        vehiclesInputs[index] = value;
+        setVehicles({
+            vehiclesInputs,
+        });
+    }
+    const setUnitsInputs = (value,index) => {
+        let { unitInputs } = vehicles;
+        unitInputs[index] = value;
+        setUnits({
+            unitInputs,
+        });
     }
     return(
         <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
-            <ScrollView>
-                <Box>
-                <Heading>Vehiculos</Heading>
-                <FlatList
-                    data={vehicles}
-                    renderItem={({item}) => (
-                        <VStack>
-                        <Text>{item.id}</Text>
-                        <Input placeholder='Capacidad' keyboardType='number-pad' value={item.cap} onChangeText={(value)=>{item.cap=value}} />
-                        <Divider my={1}/>
-                        </VStack>
-                    )}
-                />
+            <Box> 
+                <Collapse isOpen={show}>
+                    <Alert variant='outline'>
+                      
+                        <HStack alignItems="center">
+                        <Text  fontSize="md">Utilizar la misma unidad de medida.</Text>
+
+                        <IconButton
+                            icon={<CloseIcon size='3' color="coolGray.600" />}
+                            onPress={() => setShow(false)}
+                        />
+                        </HStack>
+                    </Alert>
+                </Collapse>
+                <Box maxH="92%">
+                    <Heading>Vehiculos</Heading>
+                    <FlatList
+                        data={iVehicles}
+                        renderItem={({ item, index }) => (
+                            <VStack>
+                                <Text>{index+1}</Text>
+                                <Input placeholder='Capacidad' value={vehicles.vehiclesInputs[index]} onChangeText = {(value)=>{setVehiculsInputs(value,index)}} />
+                            </VStack>
+                        )}
+                        keyExtractor={item => item}
+                    />
+                    <Heading>Unidades embarcadas</Heading>
+                    <FlatList
+                        data={iUnits}
+                        renderItem={({ item, index }) => (
+                            <VStack>
+                                <Text>{index+1}</Text>
+                                <Input placeholder='Peso' value={units.unitInputs[index]} onChangeText = {(value)=>{setUnitsInputs(value,index)}} />
+                            </VStack>
+                        )}
+                        keyExtractor={item => item}
+                    />
                 </Box>
-                <Box>
-                    <Heading>Embarques</Heading>
-                </Box>
-            </ScrollView>
+                <Button colorScheme='success' >Optimizar embarque</Button>
+            </Box>
         </KeyboardAvoidingView>
     );
 
@@ -945,6 +1021,7 @@ export const Configuracion = ({navigation}) => {
                     </VStack>
                     
                 )}
+                keyExtractor={(item) => item.type}
             />
         </Box>
     );
