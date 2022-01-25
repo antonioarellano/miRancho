@@ -1,12 +1,17 @@
 
 import React, { useState, useMemo } from 'react';
 import {NativeBaseProvider} from 'native-base';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-
+import { ranchoReducer } from './ranchoReducer';
 import * as screens from './screens';
+
+const ranchoStore = createStore(ranchoReducer);
+
 
 const NavLogin = createNativeStackNavigator();
 const NavConfig = createNativeStackNavigator();
@@ -62,17 +67,16 @@ export default function App() {
   const providerValue = useMemo(()=> ({user,setUser}), [user,setUser]);
   return (
     <NativeBaseProvider >
-
+        <Provider store={ranchoStore}>
         <NavigationContainer>
           <NativeBaseProvider>
           <NavLogin.Navigator screenOptions={{headerShown: false}}>
-            
             <NavMain.Screen name='rancho' component={Rancho} />
             <NavMain.Screen name='inicio' component={Inicio} />
           </NavLogin.Navigator>
           </NativeBaseProvider>
         </NavigationContainer>
-        
+        </Provider>
     </NativeBaseProvider>
   );
 }

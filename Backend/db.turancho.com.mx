@@ -1,0 +1,50 @@
+﻿; Domain: turancho.com.mx
+; Exported (y-m-d hh:mm:ss): 2021-12-08 10:09:35
+;
+; This file is intended for use for informational and archival
+; purposes ONLY and MUST be edited before use on a production
+; DNS server.
+;
+; In particular, you must update the SOA record with the correct
+; authoritative name server and contact e-mail address information,
+; and add the correct NS records for the name servers which will
+; be authoritative for this domain.
+;
+; For further information, please consult the BIND documentation
+; located on the following website:
+;
+; http://www.isc.org/
+;
+; And RFC 1035:
+;
+; http://www.ietf.org/rfc/rfc1035.txt
+;
+; Please note that we do NOT offer technical support for any use
+; of this zone data, the BIND name server, or any other third-
+; party DNS software.
+;
+; Use at your own risk.
+
+
+$ORIGIN turancho.com.mx.
+
+; SOA Record
+@	3600	 IN 	SOA	ns11.domaincontrol.com.	dns.jomax.net. (
+					2021120801
+					28800
+					7200
+					604800
+					3600
+					) 
+
+; A Record
+turancho.com.mx	600	 IN 	A	187.133.122.149
+
+; NS Record
+@	3600	 IN 	NS	ns11.domaincontrol.com.
+@	3600	 IN 	NS	ns12.domaincontrol.com.
+
+; CNAME Record
+www	3600	 IN 	CNAME	@
+_domainconnect	3600	 IN 	CNAME	_domainconnect.gd.domaincontrol.com.
+

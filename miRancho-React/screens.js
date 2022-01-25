@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, InputGroup} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { UserContext } from './UserContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+import { useDispatch, useSelector } from 'react-redux';
+
+const dispatch = useDispatch();
 // Navegacion de Inicio //
 
 //Screen LogIn
 export const LogIn = ({navigation}) => {
     const [data, setData] = React.useState({});
     const [errors, setError] = React.useState({});
-    const setUser = React.useContext(UserContext);
+    
     const getUser = async () => {
         console.log(data.user,data.pass)
         return data.user;
@@ -271,6 +273,9 @@ var animal = {
     raza:'',
     color:'',
     predio:'',
+}
+const addAnimal = (animal) => {
+    dispatch(createAnimal(animal))
 }
 export const Ganado = ({navigation}) => {
     const [key, setKey] = React.useState({type:'arete',word:''})
