@@ -4,7 +4,7 @@
     $name = $_POST['n'];
     $address = $_POST['a'];
     $mail = $_POST['m'];
-    $clave = $_POST['c'];
+    $clave = random_int(1000,9999);
     require ('dConn.php');
     if ($user==und)
     $conexion = mysqli_connect($host,$user,$pass, $bd);
@@ -17,7 +17,7 @@
     $sql = 'CALL cUSER(?,?,?,?,?,?);';
     $resultado = mysqli_prepare($conexion,$sql);
     // i int,  s string, f float 
-    $ok = mysqli_stmt_bind_param($resultado,'ssssss',$user,$pass,$name,$address,$mail,$clave);
+    $ok = mysqli_stmt_bind_param($resultado,'sssssi',$user,$pass,$name,$address,$mail,$clave);
     $ok = mysqli_stmt_execute($resultado);
     if ($ok == false){
         echo '0';

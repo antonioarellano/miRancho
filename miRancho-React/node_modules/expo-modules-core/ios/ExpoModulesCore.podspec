@@ -18,24 +18,29 @@ Pod::Spec.new do |s|
 
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
-    'DEFINES_MODULE' => 'YES'
+    'USE_HEADERMAP' => 'YES',
+    'DEFINES_MODULE' => 'YES',
+    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++14',
+    'SWIFT_COMPILATION_MODE' => 'wholemodule',
   }
 
   s.dependency 'React-Core'
+  s.dependency 'ReactCommon/turbomodule/core'
 
   if !$ExpoUseSources&.include?(package['name']) && ENV['EXPO_USE_SOURCE'].to_i == 0 && File.exist?("#{s.name}.xcframework") && Gem::Version.new(Pod::VERSION) >= Gem::Version.new('1.10.0')
     s.source_files = '**/*.h'
     s.vendored_frameworks = "#{s.name}.xcframework"
   else
-    s.source_files = '**/*.{h,m,swift}'
+    s.source_files = '**/*.{h,m,mm,swift}'
   end
 
   s.exclude_files = 'Tests/'
+  s.private_header_files = ['**/*+Private.h', '**/Swift.h']
 
   s.test_spec 'Tests' do |test_spec|
     test_spec.dependency 'Quick'
     test_spec.dependency 'Nimble'
 
-    test_spec.source_files = 'Tests/**/*.swift'
+    test_spec.source_files = 'Tests/**/*.{m,swift}'
   end
 end

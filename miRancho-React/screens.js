@@ -1,43 +1,29 @@
-import React, { Component } from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, InputGroup} from 'native-base';
+import React, { useEffect } from 'react';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import NetInfo from "@react-native-community/netinfo";
+import { Platform } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
+import * as action from './ranchoActions';
 
-const dispatch = useDispatch();
-// Navegacion de Inicio //
+// CONSTANTES GLOBALES
+const api = 'http://192.168.1.250/request/';
+
+  // Navegacion de Inicio //
 
 //Screen LogIn
 export const LogIn = ({navigation}) => {
+    const dispatch = useDispatch();
+    const session = useSelector((state) => state.jwt);
+    if(session != false)
+        navigation.navigate('rancho');
+    const HandleLogin = () => {
+        dispatch(action.getSession(data.user,data.pass));
+    }
     const [data, setData] = React.useState({});
     const [errors, setError] = React.useState({});
-    
-    const getUser = async () => {
-        console.log(data.user,data.pass)
-        return data.user;
-    }
-    const handleLogin = () => {
-        navigation.navigate('rancho')
-        //Validar
-        /* 
-        console.log("validando")
-        if (data.user === undefined || data.user === ''){
-            setError({...errors,user:'Se necesita un usuario'})
-            return false;
-        }   
-        if (data.pass === undefined || data.pass === ''){
-            setError({...errors,pass:'Se necesita una contraseña'})
-            return false;
-        }
-        const user = getUser();
-         
-        setUser(user);
-        */
-        //Peticion HTTP
-        // Establece el user de context
-        
-    }
    
     return(
         < Box justifyContent='center'  flex= {1}>
@@ -67,65 +53,146 @@ export const LogIn = ({navigation}) => {
                     }
                 </FormControl>
             </VStack>
-            <Button colorScheme='success' onPress={() => navigation.navigate('rancho')}>Entrar</Button>
+            <Divider my={1}/>
+            <Button colorScheme='success' onPress={HandleLogin} size = 'lg'>Entrar</Button>
             <Divider my={3}/>
-            <Button colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('recPass')}>Olvide mi contraseña</Button>
-            <Button colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>
+            <Button size = 'md' colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('recPass')}>Olvide mi contraseña</Button>
+            <Divider my={1}/>
+            <Button size = 'md' colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>
         </Box>
     );
 }
 //Screen SignIn
 export const SingIn = ({navigation}) => {
+
     const [data, setData] = React.useState({});
         // user,name,pass,cpass,address, mail, terms.
     const [errors, setError] = React.useState({});
-    
-    const HandleRegister = () => {
-        if (data.user === undefined ) {
-            setError(...errors, {user:'Se necesita usuario'})
+    const [terms, setTerms] = React.useState(false);
+    const [showModal, setShow] = React.useState(false);
+    const [tkn, setTkn] = React.useState('');
+
+    const createUser = async () => {
+        try {
+            const response = await fetch(
+                'https://turancho.com.mx/request/cUser.php', 
+                {
+                    method: 'POST',
+                    body: JSON.stringify(
+                        {
+                            u:data.user,
+                            p:data.pass,
+                            n:data.name,
+                            a:data.address,
+                            m:data.mail
+                        }
+                    )
+                }
+            );
+            const json = await response.json();
+            return json.user;
+        } catch (error) {
             return false;
         }
-        if (data.pass === undefined ) {
-            setError(...errors, {pass:'Se necesita contraseña'})
-            return false;
+    };
+    const verifyUser = async () => {
+        try{
+            const response = await fetch(api+'vUser.php?u='+data.user);
+            const responseTxt = await response.text();
+            if(responseTxt < 1){
+                delete errors.user;
+                setError({...errors});
+                return true;
+            }
+            else{
+                setError({...errors, user:'Usuario en uso'});
+                return false;
+            }
+
+        }catch(error){
+            setError({...errors, user:error})
         }
-        if (data.cpass === undefined ) {
-            setError(...errors, {pass:'Se necesita confirmar la contraseña'})
-            return false;
+    };
+    const verifyMail = async() => {
+        try{
+            const response = await fetch(api+'vMail.php?m='+data.mail);
+            const responseTxt = await response.text();
+            if(responseTxt < 1){
+                delete errors.mail;
+                setError({...errors});
+                return true;
+            }
+            else{
+                setError({...errors, mail:'Correo electrónico en uso'});
+                return false;
+            }
+
+        }catch(error){
+            setError({...errors, mail:error})
         }
-        if (data.name === undefined ) {
-            setError(...errors, {name:'Se necesita el nombre'})
+    };
+    function validForm () {
+        if (data.user === undefined) {
+            setError({...errors, user:'Se necesita usuario'})
             return false;
-        }
-        if (data.address === undefined ) {
-            setError(...errors, {address:'Se necesita domicilio'})
+        }else
+            delete errors.user;
+        if (data.pass === undefined|| data.cpass === undefined ) {
+            setError({...errors, pass:'Se necesita contraseña'})
             return false;
-        }
-        if (data.mail === undefined ) {
-            setError(...errors, {mail:'Se necesita cuenta de correo electrónico'})
+        }else
+            delete errors.pass;
+        if (data.name === undefined) {
+            setError({...errors, name:'Se necesita el nombre'});
             return false;
-        }
-        if (data.terms === undefined ) {
-            setError(...errors, {terms:'Se aceptar los términos y condiciones de uso'})
+        }else
+            delete errors.name
+        if (data.address === undefined) {
+            setError({...errors, address:'Se necesita domicilio'});
             return false;
-        }
+        }else
+            delete errors.address
+        if (data.mail === undefined) {
+            setError({...errors, mail:'Se necesita cuenta de correo electrónico'});
+            return false;
+        }else
+            delete errors.mail
+        if (terms === undefined || terms == false) {
+            setError({...errors, terms:'Necesitas aceptar los términos y condiciones de uso'});
+            return false;
+        }else
+            delete errors.terms
         if (data.pass != data.cpass){
-            setError(...errors, {pass:'Las contraseñas no coinciden'})
+            setError({...errors, pass:'Las contraseñas no coinciden'})
             return false;
-        }
-        // Comprobar si existe el usuario
-        //Comprobar el correo 
+        }else
+            delete errors.pass
+        return true;
+    }
+    const HandleRegister = async() =>{
+            NetInfo.fetch().then(state => {
+                if(state.isConnected){
+                    verifyUser().then( validUser =>{
+                        if (validUser){
+                            verifyMail().then(validMail =>{
+                                if(validMail)
+                                    setShow(true);
+                            });    
+                        }
+                    }); 
+                }
+              });
     }
     return (
-        <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "height" : "", Platform.OS === 'web'? "":""} keyboardVerticalOffset={100} >
         <ScrollView>
         <Box justifyContent='center'  flex= {1}>
             <VStack><FormControl isRequired isInvalid={'user' in errors}>
                 <FormControl.Label>Nombre de Usuario (Se sugiere usar la CURP)</FormControl.Label>
                 <Input 
-                    p={2} 
                     placeholder='Usuario'
-                    onChangeText={(value) => {setData(...data, {user: value})}}
+                    onChangeText={(value) => setData({...data, user:value})}
+                    maxLength={20}
                 />
                 {'user' in errors ?
                 <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.user}</FormControl.ErrorMessage>:
@@ -138,14 +205,14 @@ export const SingIn = ({navigation}) => {
                 <Input 
                     p={2} 
                     placeholder='Contraseña'
-                    onChangeText={(value) => {setData(...data, {pass:value})}}
+                    onChangeText={(value) => setData({...data, pass:value})}
                     type = 'password'
                     
                 />
                 <Input
                     p={2}
                     placeholder='Confirmar contraseña'
-                    onChangeText={(value)=> {setData(...data, {cpass:value})}}
+                    onChangeText={(value)=> {setData({...data, cpass:value})}}
                     type = 'password'
                 />
                 {'pass' in errors ?
@@ -159,7 +226,7 @@ export const SingIn = ({navigation}) => {
                 <Input 
                     p={2} 
                     placeholder='Nombre'
-                    onChangeText={(value) => {setData(...data, {name:value})}}
+                    onChangeText={(value) => {setData({...data, name:value})}}
                 />
                 {'name' in errors ?
                 <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.name}</FormControl.ErrorMessage>:
@@ -172,7 +239,7 @@ export const SingIn = ({navigation}) => {
             <Input 
                 p={2} 
                 placeholder='Domicilio'
-                onChangeText={(value) => {setData(...data, {address:value})}}
+                onChangeText={(value) => {setData( {...data,address:value})}}
             />
 
             {'address' in errors ?
@@ -185,26 +252,63 @@ export const SingIn = ({navigation}) => {
                 <FormControl.Label>Correo electrónico</FormControl.Label>
                 <Input 
                     p={2} 
-                    keyboardType='email'
+                    keyboardType='email-address'
                     placeholder='Correo'
-                    onChangeText={(value) => setData(...data, {mail:value})}
+                    onChangeText={(value) => setData( {...data,mail:value})}
                 />
                 {'mail' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.phone}</FormControl.ErrorMessage>:
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.mail}</FormControl.ErrorMessage>:
                         <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                 }
             </FormControl></VStack>
 
             <VStack><FormControl isRequired isInvalid={'terms' in errors}>
-                <Checkbox onChange={() => {setData(...data, {terms:value})}}>
-                    Aceptar  
-                    <Link onPress={()=>navigation.navigate('terms')}> terminos y condiciones de uso</Link>
+                <Checkbox  size = 'md' onChange={(value) => setTerms(value)}>
+                    Aceptar 
+                    <Link onPress={()=>navigation.navigate('terms')}>  terminos y condiciones de uso</Link>
                 </Checkbox>
-                    
+                {'terms' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.terms}</FormControl.ErrorMessage>:
+                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Es necesario aceptar</FormControl.HelperText>
+                } 
             </FormControl></VStack>
             <Divider my={2}/>
-            <Button colorScheme='success' onPress={HandleRegister}>Registrar</Button>
+            <Button colorScheme='success' size = 'lg' onPress={HandleRegister}>Registrar</Button>
         </Box>
+        <Modal isOpen={showModal} onClose={() => setShow(false)}>
+            <Modal.Content>
+                <Modal.CloseButton />
+                <Modal.Header>Verificar correo electrónico</Modal.Header>
+                <Modal.Body size='full'>
+                    <FormControl isRequired isInvalid={'token' in errors}>
+                        <FormControl.Label>Código de verificación</FormControl.Label>
+                        <Input 
+                            placeholder='Ingresar código'
+                            onChangeText={(value) => setTkn(value)}
+                            maxLength={5}
+                        />
+                        {'token' in errors ?
+                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.token}</FormControl.ErrorMessage>:
+                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Si no encuentras el correo revisar SPAM</FormControl.HelperText>
+                        }
+                    </FormControl>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button.Group space={2}>
+                        <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {
+                        setShowModal(false);
+                        }}>
+                            Cancelar
+                        </Button >
+                        <Button onPress={() => {
+                        setShowModal(false);
+                        }}>
+                            Verificar
+                        </Button>
+                    </Button.Group>
+                </Modal.Footer>
+            </Modal.Content>
+        </Modal>
         </ScrollView>
         </KeyboardAvoidingView>
     );
@@ -244,24 +348,6 @@ export const newPass = ({navigation}) => {
 
 }
  
-//Screen verMail
-export const verMail = ({route,navigation}) => {
-    const mail = route.params;
-    const [key, setKey] = React.useState('');
-
-    return(
-        <Box>
-            <Text>Ingrese el código de verificación enviado a:</Text>
-            <Text size='md' >{mail} </Text>
-            <Input 
-                keyboardType='numeric'
-                value = {key.toString()}
-                onChangeText = {(value) => setKey(value)}
-            />
-            <Button colorScheme='success'>Enviar</Button>
-        </Box>
-    );
-}
 // Navegacion "Rancho" //
 
 //Screen Ganado
@@ -274,14 +360,15 @@ var animal = {
     color:'',
     predio:'',
 }
-const addAnimal = (animal) => {
-    dispatch(createAnimal(animal))
+
+export const Hato = ({navigation}) => {
+
 }
+
 export const Ganado = ({navigation}) => {
     const [key, setKey] = React.useState({type:'arete',word:''})
     const [data,setData] = React.useState(animal)
     const [errors, setErrors] = React.useState({})
-    const user = React.useContext(UserContext)
     return (
         <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
             <ScrollView >
@@ -997,18 +1084,20 @@ export const setConfig = ({route, navigation}) => {
     }
 }
 var perfil = [
-    {type:'Usuario',data:'a'},
-    {type:'Nombre',data:'n'},
-    {type:'Contraseña',data:''},
-    {type:'Dirección',data:'s'},
-    {type:'Teléfono',data:0},
+    {type:'user',data:'a'},
+    {type:'name',data:'n'},
+    {type:'pass',data:''},
+    {type:'address',data:'s'},
+    {type:'phone',data:0},
 ]
 export const Configuracion = ({navigation}) => {
-    //cargar perfil
-    const [params, setParams] = React.useState(perfil);
+    React.useEffect(() => {   
+        useDispatch(Actions.getPerfil()); 
+    });
+    const params = useSelector(state => state.perfil)
         // user,name,pass,cpass,address, phone.
     const [errors, setError] = React.useState({});
- 
+    
     return (
         <Box >
             <Box bgColor='#DEDDDA'>

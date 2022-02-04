@@ -9,7 +9,7 @@
     }
     mysqli_set_charset($conexion, 'utf8');
 
-    $sql = 'CALL vUSER(?);';
+    $sql = 'CALL gUSER(?);';
     $resultado = mysqli_prepare($conexion,$sql);
     // i int,  s string, f float 
     $ok = mysqli_stmt_bind_param($resultado,'s',$dato);

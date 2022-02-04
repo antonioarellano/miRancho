@@ -1,16 +1,19 @@
-
-import React, { useState, useMemo } from 'react';
+import Animated, {
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+  Easing,
+} from 'react-native-reanimated';
+import React from 'react';
 import {NativeBaseProvider} from 'native-base';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
-import 'react-native-gesture-handler';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { ranchoReducer } from './ranchoReducer';
 import * as screens from './screens';
 
-const ranchoStore = createStore(ranchoReducer);
+import { Provider } from 'react-redux';
+import Store from './ranchoStore';
 
 
 const NavLogin = createNativeStackNavigator();
@@ -61,22 +64,19 @@ const Rancho = ({navigation}) => {
     </NavRancho.Navigator>
   );
 }
+const store = Store();
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const providerValue = useMemo(()=> ({user,setUser}), [user,setUser]);
   return (
-    <NativeBaseProvider >
-        <Provider store={ranchoStore}>
-        <NavigationContainer>
-          <NativeBaseProvider>
-          <NavLogin.Navigator screenOptions={{headerShown: false}}>
-            <NavMain.Screen name='rancho' component={Rancho} />
-            <NavMain.Screen name='inicio' component={Inicio} />
-          </NavLogin.Navigator>
-          </NativeBaseProvider>
-        </NavigationContainer>
-        </Provider>
-    </NativeBaseProvider>
+          <Provider store={store}>
+            <NativeBaseProvider>
+              <NavigationContainer>
+                <NavLogin.Navigator screenOptions={{headerShown: false}}>
+                  <NavMain.Screen name='inicio' component={Inicio} />
+                  <NavMain.Screen name='rancho' component={Rancho} />
+                </NavLogin.Navigator>
+              </NavigationContainer>
+            </NativeBaseProvider>
+          </Provider>
   );
 }

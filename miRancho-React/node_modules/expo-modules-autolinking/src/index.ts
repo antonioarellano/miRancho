@@ -1,5 +1,6 @@
 import commander from 'commander';
 
+import { patchReactImportsAsync } from './ReactImportsPatcher';
 import {
   findModulesAsync,
   resolveModulesAsync,
@@ -33,6 +34,7 @@ function registerSearchCommand<OptionsType extends SearchOptions>(
       'The platform that the resulting modules must support. Available options: "ios", "android"',
       'ios'
     )
+    .option('--silent', 'Silence resolution warnings')
     .action(async (searchPaths, providedOptions) => {
       const options = await mergeLinkingOptionsAsync<OptionsType>({
         ...providedOptions,
@@ -51,6 +53,15 @@ function registerResolveCommand<OptionsType extends ResolveOptions>(
   fn: (search: SearchResults, options: OptionsType) => any
 ) {
   return registerSearchCommand<OptionsType>(commandName, fn);
+}
+
+// Register for `patch-react-imports` command
+function registerPatchReactImportsCommand() {
+  return commander
+    .command('patch-react-imports [paths...]')
+    .requiredOption('--pods-root <podsRoot>', 'The path to `Pods` directory')
+    .option('--dry-run', 'Only list files without writing changes to the file system')
+    .action(patchReactImportsAsync);
 }
 
 module.exports = async function (args: string[]) {
@@ -100,6 +111,8 @@ module.exports = async function (args: string[]) {
       'Whether to only generate an empty list. Might be used when the user opts-out of autolinking.',
       false
     );
+
+  registerPatchReactImportsCommand();
 
   await commander
     .version(require('expo-modules-autolinking/package.json').version)
