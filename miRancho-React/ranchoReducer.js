@@ -1,39 +1,12 @@
-import NetInfo from "@react-native-community/netinfo";
-const api = 'http://192.168.1.250/request/';
-
-var perfil = [
-    {type:'Usuario',data:'a'},
-    {type:'Nombre',data:'n'},
-    {type:'Contraseña',data:''},
-    {type:'Dirección',data:'s'},
-    {type:'Teléfono',data:0},
-]
-
-const getSession = async (usr,pass) => {
-    const response = await fetch(api+'gSession.php',{
-        method: 'POST',
-        body: {u:usr, p:pass}
-    });
-    const responseTxt = await response.text();
-    if (responseTxt!=null)
-        return responseTxt;
-    else
-        return null;
-}
-const getPerfil = async (tkn) => {
-    const response = await fetch(api+'gPerfil.php',{
-        method: 'GET',
-        headers: 'Authorization: Bearer '+tkn
-    });
-    return await response.json();
-}
 
 function rootReducer(state, action){
     switch (action.type){
-        case '@get/session':
-            return {...state, jwt:getSession(action.payload.user,action.payload.pass)}
-        case '@get/perfil':
-            return {...state, perfil:getPerfil(state.jwt)}
+        case '@set/session':
+            return {...state,jwt:action.payload.session}  
+        case '@set/perfil':
+            return {...state,perfil:action.payload.perfil}
+        case '@set/hato':
+            return {...state,hato:action.payload.hato}  
         case '@create/animal':
             return {...state, animales:[...state.animales,action.payload]}
         case '@create/sanitario':

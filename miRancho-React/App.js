@@ -53,7 +53,7 @@ const Configuracion = ({navigation}) => {
 const Rancho = ({navigation}) => {
   return (
     <NavRancho.Navigator initialRouteName="Ganado">
-        <NavRancho.Screen name='Ganado' component={screens.Ganado}/>
+        <NavRancho.Screen name='Ganado' component={screens.Hato}/>
         <NavRancho.Screen name='Vacunas' component={screens.Vacunas}/>
         <NavRancho.Screen name='Controles sanitarios' component={screens.ControlSan}/>
         <NavRancho.Screen name='Controles reproductivos' component={screens.ControlRep}/>

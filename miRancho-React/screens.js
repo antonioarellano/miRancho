@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal} from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast } from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import NetInfo from "@react-native-community/netinfo";
@@ -16,15 +16,32 @@ const api = 'http://192.168.1.250/request/';
 //Screen LogIn
 export const LogIn = ({navigation}) => {
     const dispatch = useDispatch();
-    const session = useSelector((state) => state.jwt);
-    if(session != false)
-        navigation.navigate('rancho');
-    const HandleLogin = () => {
-        dispatch(action.getSession(data.user,data.pass));
-    }
+    const session = useSelector(state => state.jwt);
+    const toast = useToast();
+    
+    const [cntLogin, setCounter] = React.useState(0);
     const [data, setData] = React.useState({});
     const [errors, setError] = React.useState({});
-   
+
+    React.useEffect(() => {
+        if(session != false)
+            navigation.navigate('rancho');  
+    })
+    const HandleLogin = () => {
+        if(cntLogin > 10)
+            toast.show({ title:'Intente mas tarde',status:'error', description: "Demasiados intentos" })
+        else
+            NetInfo.fetch().then(state=>{
+                if(state.isConnected){
+                    setCounter(cntLogin+1);
+                    dispatch(action.getSession(data.user, data.pass));
+                    if(session == false)
+                        toast.show({title:'Credenciales incorrectas',status:'warning', description: "Intente de nuevo"})
+                }
+                else
+                    toast.show({title:'No hay conexión',status:'warning', description: "Intente mas tarde"})
+            })
+    }
     return(
         < Box justifyContent='center'  flex= {1}>
             <VStack><FormControl isRequired isInvalid={'user' in errors}>
@@ -58,13 +75,15 @@ export const LogIn = ({navigation}) => {
             <Divider my={3}/>
             <Button size = 'md' colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('recPass')}>Olvide mi contraseña</Button>
             <Divider my={1}/>
-            <Button size = 'md' colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>
+            <Button size = 'md' colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>  
         </Box>
     );
 }
+
+/// IMPLEMNTAR EL RECAPTCHA DE GOOGLE V2
 //Screen SignIn
 export const SingIn = ({navigation}) => {
-
+    const toast = useToast();
     const [data, setData] = React.useState({});
         // user,name,pass,cpass,address, mail, terms.
     const [errors, setError] = React.useState({});
@@ -180,7 +199,8 @@ export const SingIn = ({navigation}) => {
                             });    
                         }
                     }); 
-                }
+                }else
+                    toast({title:'No hay conexión',status:'warning',description:'Se necesita conexion'});
               });
     }
     return (
@@ -362,7 +382,10 @@ var animal = {
 }
 
 export const Hato = ({navigation}) => {
-
+    const tkn = useSelector((state)=>state.jwt);
+    return(
+        <Text>{tkn}</Text>
+    )
 }
 
 export const Ganado = ({navigation}) => {
@@ -1091,11 +1114,13 @@ var perfil = [
     {type:'phone',data:0},
 ]
 export const Configuracion = ({navigation}) => {
-    React.useEffect(() => {   
-        useDispatch(Actions.getPerfil()); 
-    });
-    const params = useSelector(state => state.perfil)
+    const tkn = useSelector(state => state.jwt);
+    const params = useSelector(state => state.perfil);
+    const dispatch = useDispatch();
         // user,name,pass,cpass,address, phone.
+    React.useEffect(() => {
+        dispatch(action.getPerfil(tkn));
+    })
     const [errors, setError] = React.useState({});
     
     return (
