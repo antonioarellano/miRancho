@@ -30,8 +30,23 @@ export const getPerfil = (tkn) => {
             method: 'GET',
             headers: 'Authorization: Bearer '+tkn
         });
-        return await response.json();
+        const perfil = await response.json();
+        if(perfil != false)
+                dispatch(setPerfil(perfil));
+            else
+                return;
     }
+}
+export const getHato = (tkn) => {
+        fetch(api+'gHato.php',{
+            method: 'GET',
+            headers: {'Authorization':'Bearer '+tkn}
+        }).then(res => res.json()).then(txt => {
+            console.log(txt);
+            setHato(txt);
+        }).catch(e => console.log(e))
+
+    
 }
 const setSession = (session) =>{
     return {
@@ -45,13 +60,15 @@ const setPerfil = (perfil) =>{
         payload: {perfil:perfil}
     }
 }
-const setHato = () => { 
+const setHato = (animals) => { 
     return {
-        type: '@get/animals'
+        type: '@set/hato',
+        payload: {hato:animals}
     }
 }
-const getControls = () => {
+const setControls = (controls) => {
     return {
-        type: '@get/controls'
+        type: '@set/controls',
+        payload: {controls:controls}
     }
 }

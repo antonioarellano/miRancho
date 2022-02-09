@@ -6,7 +6,7 @@ import thunk from 'redux-thunk'
 
 var initialState = {
   jwt:false,
-  hato:[],
+  hato:[{arete:'0',name:'N/A'}],
   controles:[],
   vacunas:[],
   pesajes:[],

@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast } from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast, Pressable} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import NetInfo from "@react-native-community/netinfo";
 import { Platform } from 'react-native';
+import ReCAPTCHA from "react-google-recaptcha";
 
 import { useDispatch, useSelector } from 'react-redux';
 import * as action from './ranchoActions';
+import { set } from 'react-native-reanimated';
 
 // CONSTANTES GLOBALES
 const api = 'http://192.168.1.250/request/';
@@ -34,9 +36,10 @@ export const LogIn = ({navigation}) => {
             NetInfo.fetch().then(state=>{
                 if(state.isConnected){
                     setCounter(cntLogin+1);
-                    dispatch(action.getSession(data.user, data.pass));
-                    if(session == false)
-                        toast.show({title:'Credenciales incorrectas',status:'warning', description: "Intente de nuevo"})
+                    dispatch(action.getSession(data.user, data.pass)).then(s => {
+                        if(session === false)
+                            toast.show({title:'Credenciales incorrectas',status:'warning', description: "Intente de nuevo"})
+                        })
                 }
                 else
                     toast.show({title:'No hay conexión',status:'warning', description: "Intente mas tarde"})
@@ -90,6 +93,7 @@ export const SingIn = ({navigation}) => {
     const [terms, setTerms] = React.useState(false);
     const [showModal, setShow] = React.useState(false);
     const [tkn, setTkn] = React.useState('');
+    const [captcha, setCaptcha] = React.useState('');
 
     const createUser = async () => {
         try {
@@ -151,6 +155,10 @@ export const SingIn = ({navigation}) => {
         }
     };
     function validForm () {
+        if(captcha == '')
+            setError({...errors,captcha:'Es un robot?'})
+        else
+            delete errors.captcha;    
         if (data.user === undefined) {
             setError({...errors, user:'Se necesita usuario'})
             return false;
@@ -292,6 +300,7 @@ export const SingIn = ({navigation}) => {
                     <FormControl.HelperText _text={{fontSize: 'xs'}}>Es necesario aceptar</FormControl.HelperText>
                 } 
             </FormControl></VStack>
+
             <Divider my={2}/>
             <Button colorScheme='success' size = 'lg' onPress={HandleRegister}>Registrar</Button>
         </Box>
@@ -371,6 +380,32 @@ export const newPass = ({navigation}) => {
 // Navegacion "Rancho" //
 
 //Screen Ganado
+
+
+export const Hato = ({navigation}) => {
+    const tkn = useSelector((state)=>state.jwt);
+    const hato = useSelector((state)=> state.hato);
+    const toast = useToast();
+    action.getHato(tkn);
+    return(
+        <Box>
+            <FlatList data={hato}  renderItem={({item}) => 
+                <Pressable onPress={() => toast.show({title:item.arete})}>
+                    <HStack borderBottomWidth="1">
+                        <Icon size="xl" as={MaterialCommunityIcons} name="cow"/>
+                        <VStack>
+                            <Heading>{item.arete}</Heading>
+                            <Text>{item.name}</Text>
+                        </VStack>
+                    </HStack>             
+                </Pressable>
+            }
+            keyExtractor={item=>item.arete}
+            />
+        </Box>
+    )
+}
+
 var animal = {
     arete:'',
     nombre:'',
@@ -380,14 +415,6 @@ var animal = {
     color:'',
     predio:'',
 }
-
-export const Hato = ({navigation}) => {
-    const tkn = useSelector((state)=>state.jwt);
-    return(
-        <Text>{tkn}</Text>
-    )
-}
-
 export const Ganado = ({navigation}) => {
     const [key, setKey] = React.useState({type:'arete',word:''})
     const [data,setData] = React.useState(animal)
