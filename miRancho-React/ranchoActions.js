@@ -46,7 +46,7 @@ export const getHato = (tkn) => {
         });
         const hato = await response.json();
         if(hato!=false)
-            dispatch(setHato(hato));
+            dispatch(setBkpHato(hato));
         else
             dispatch(setBkpHato(true));
         }catch(error){
@@ -56,19 +56,25 @@ export const getHato = (tkn) => {
     }
 }
 export const searchAnimal = (search,hato) => {
-    return dispatch => {
+    return async dispatch => {
         var result =  Array();
         for (const animal in hato) 
-            if (animal.arete.includes(search.word)||animal.name.includes(search.word))
+            if (animal.arete.includes(search)||animal.name.includes(search))
                 result.push(animal);
-        dispatch(setHato(result));
+        await dispatch(setHato(result));
     }
 }
-export const setBkpHato = (animals) => { 
-    return {
-        type: '@set/bkpHato',
-        payload: {hato:animals}
-    }
+const setBkpHato = (animals) => {
+    if(animals === true) 
+        return {
+            type: '@set/bkpHato',
+            payload: {hato:animals}
+        }
+    else
+        return{
+            type: '@init/hato',
+            payload: {hato:animals}
+        }
 }
 export const setHato = (animals) => { 
     return {

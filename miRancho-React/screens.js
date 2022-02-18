@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast, Pressable} from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast, Pressable, View} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import NetInfo from "@react-native-community/netinfo";
@@ -9,6 +9,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { useDispatch, useSelector } from 'react-redux';
 import * as action from './ranchoActions';
 import { set } from 'react-native-reanimated';
+import { enableScreens } from 'react-native-screens';
 
 // CONSTANTES GLOBALES
 const api = 'http://192.168.1.250/request/';
@@ -390,14 +391,8 @@ export const Hato = ({navigation}) => {
     const toast = useToast();
     const [search, setSearch] = React.useState('');
     const [animal, setAnimal] = React.useState({});
-    const [show,setShow] = React.useState(false);
-    const resolvSearch = (value) => {
-        setSearch(value);
-        if(search == '')
-            dispatch(action.setHato(bkp));
-        else
-            dispatch(action.searchAnimal(data.word,bkpHato));
-    }
+    const [showAnimal,setShow] = React.useState(false);
+
     const SexIcon = props =>{
         let { sex } = props;
         if(sex == 'M')
@@ -406,32 +401,94 @@ export const Hato = ({navigation}) => {
             return <Icon size="xl" as={MaterialCommunityIcons} name='gender-female' color='#DC8ADD' width='15%'/>
     }
     React.useEffect(() => {
-        if(!bkp){
-            dispatch(action.getHato(tkn));
-            console.log(hato);
-            dispatch(action.setBkpHato(hato));    
-        }
+        if(bkp == false)
+            dispatch(action.getHato(tkn)); 
     })
+    const filtrar = (search) => {
+        var resultado = bkp.filter((animal)=>{
+            if(animal.arete.toString().toLowerCase().includes(search.toString().toLowerCase()) || animal.name.toString().toLowerCase().includes(search.toString().toLocaleLowerCase()))
+                return animal;
+        });
+        dispatch(action.setHato(resultado));
+    }
+    const handleSearch = txt => {
+        setSearch(txt);
+        filtrar(txt);
+    }
+    const handleAnimal = (item) =>{
+        setAnimal(item);
+        setShow(true);
+    }
     return(
-        <Box>
-            <Input onChangeText={(value) => resolvSearch(value)} placeholder="Buscar" borderWidth={1} variant="filled" width="100%" borderRadius="10" py="1" px="2" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
-            <FlatList data={hato}  renderItem={({item}) => 
-                <Pressable onPress={() => toast.show({title:item.arete})}>
-                    <HStack borderBottomWidth="1" space='4' >
-                        <Icon size="xl" as={MaterialCommunityIcons} name="cow" width='20%'/>
-                        <VStack width="65%">
-                            <Heading>{item.arete}</Heading>
-                            <Text>{item.name}</Text>
-                        </VStack>
-                        <SexIcon sex={item.sex}/>
-                    </HStack>  
-                               
-                </Pressable>
-            }
-            keyExtractor={item=>item.arete}
-            />
-            
-        </Box>
+        <View>
+            <Box>
+                <Input onChangeText={handleSearch} value={search}placeholder="Buscar" borderWidth={1} variant="filled" width="100%" borderRadius="10" py="1" px="2" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
+                <FlatList data={hato}  renderItem={({item}) => 
+                    <Pressable onPress={() => handleAnimal(item)}>
+                        <HStack borderBottomWidth="1" space='4' >
+                            <Icon size="xl" as={MaterialCommunityIcons} name="cow" width='20%'/>
+                            <VStack width="65%">
+                                <Heading>{item.arete}</Heading>
+                                <Text>{item.name}</Text>
+                            </VStack>
+                            <SexIcon sex={item.sex}/>
+                        </HStack>               
+                    </Pressable>
+                }
+                keyExtractor={item=>item.arete}
+                />
+                
+            </Box>
+            <Modal isOpen={showAnimal} onClose={() => setShow(false)}>
+            <Modal.Content>
+                <Modal.CloseButton />
+                <Modal.Header alignSelf="center" _text={{fontSize:'xl',Overridden:'bold'}}>{animal.arete}</Modal.Header>
+                <Modal.Body size='full'>
+                    <VStack >
+                        <Pressable onPress={()=>toast.show({title:animal.name})}>
+                            <Text fontSize='2xs'>Nombre</Text>
+                            <Text fontSize='md'>{animal.name}</Text>
+                            <Divider />
+                        </Pressable>
+                        <Pressable>
+                            <Text fontSize='2xs'>Nacimiento</Text>
+                            <Text>{animal.nac}</Text>
+                            <Divider/>
+                        </Pressable>
+                        <Pressable>
+                            <Text fontSize='2xs'>Sexo</Text>
+                            <Text fontSize='md'>{animal.sex}</Text>
+                            <Divider />
+                        </Pressable>
+                        <Pressable>
+                            <Text fontSize='2xs'>Raza</Text>
+                            <Text fontSize='md'>{animal.race}</Text>
+                            <Divider />
+                        </Pressable>
+                        <Pressable>
+                            <Text fontSize='2xs'>Color</Text>
+                            <Text fontSize='md'>{animal.color}</Text>
+                            
+                        </Pressable>
+                    </VStack>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button.Group space={2}>
+                        <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {
+                        setShow(false);
+                        }}>
+                            Cancelar
+                        </Button >
+                        <Button onPress={() => {
+                        setShow(false);
+                        }}>
+                            Verificar
+                        </Button>
+                    </Button.Group>
+                </Modal.Footer>
+            </Modal.Content>
+        </Modal>
+        </View>
     )
 }
 
@@ -474,9 +531,7 @@ export const Ganado = ({navigation}) => {
                     </FormControl>
                 </Box>
                 <Divider my={1} />
-
-           
-                <Box>
+                 <Box>
                 <VStack><FormControl isInvalid={'arete' in errors}>
                     <FormControl.Label>Arete</FormControl.Label>
                     <Input
