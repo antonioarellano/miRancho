@@ -72,9 +72,9 @@ export default function App() {
             <NativeBaseProvider>
               <NavigationContainer>
                 <NavLogin.Navigator screenOptions={{headerShown: false}}>
+                  
                   <NavMain.Screen name='rancho' component={Rancho} />
                   <NavMain.Screen name='inicio' component={Inicio} />
-                  
                 </NavLogin.Navigator>
               </NavigationContainer>
             </NativeBaseProvider>

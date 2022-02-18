@@ -6,7 +6,9 @@ function rootReducer(state, action){
         case '@set/perfil':
             return {...state,perfil:action.payload.perfil}
         case '@set/hato':
-            return {...state,hato:action.payload.hato}  
+            return {...state,hato:action.payload.hato} 
+        case '@set/bkpHato':
+            return {...state,bkpHato:action.payload.hato} 
         case '@create/animal':
             return {...state, animales:[...state.animales,action.payload]}
         case '@create/sanitario':

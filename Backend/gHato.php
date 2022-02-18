@@ -7,7 +7,6 @@
 
     if(Auth::Check($tkn)){
         $id = Auth::GetData($tkn);
-        echo ($id);
         $conexion = mysqli_connect($host,$user,$pass, $bd);
         if (mysqli_connect_errno()){
             echo "Error al conectar BDD";
@@ -21,10 +20,11 @@
         if ($ok == false){
             echo 'Error al consultar';
         }else{
-            $ok = mysqli_stmt_bind_result($resultado,$arete,$nombre);
+            $ok = mysqli_stmt_bind_result($resultado,$arete,$nombre,$sexo,$nac,$raza,$color);
             $animals = array();
             while(mysqli_stmt_fetch($resultado)){
-                array_push($animals,['arete'->$arete,'name'->$nombre]);
+                $animal = array();
+                array_push($animals,['arete'=>$arete,'name'=>$nombre,'sex'=>$sexo,'nac'=>$nac,'race'=>$raza,'color'=>$color]);
             }
             echo json_encode($animals);
         }

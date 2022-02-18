@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast, Pressable} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import NetInfo from "@react-native-community/netinfo";
 import { Platform } from 'react-native';
 import ReCAPTCHA from "react-google-recaptcha";
@@ -83,7 +83,7 @@ export const LogIn = ({navigation}) => {
     );
 }
 
-/// IMPLEMNTAR EL RECAPTCHA DE GOOGLE V2
+/// IMPLEMENTAR EL RECAPTCHA DE GOOGLE V2
 //Screen SignIn
 export const SingIn = ({navigation}) => {
     const toast = useToast();
@@ -381,27 +381,56 @@ export const newPass = ({navigation}) => {
 
 //Screen Ganado
 
-
 export const Hato = ({navigation}) => {
-    const tkn = useSelector((state)=>state.jwt);
+    const tkn = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDYzNDYzNjgsInVzZXIiOiJwcnVlYmEifQ.Un0DPMUCQRtmzqIzx7_eUdXU8cPDoyQuQWlumZmyMY4';
+    // useSelector((state)=>state.jwt);
     const hato = useSelector((state)=> state.hato);
+    const bkp = useSelector((state) => state.bkpHato);
+    const dispatch = useDispatch();
     const toast = useToast();
-    action.getHato(tkn);
+    const [search, setSearch] = React.useState('');
+    const [animal, setAnimal] = React.useState({});
+    const [show,setShow] = React.useState(false);
+    const resolvSearch = (value) => {
+        setSearch(value);
+        if(search == '')
+            dispatch(action.setHato(bkp));
+        else
+            dispatch(action.searchAnimal(data.word,bkpHato));
+    }
+    const SexIcon = props =>{
+        let { sex } = props;
+        if(sex == 'M')
+            return <Icon size="xl" as={MaterialCommunityIcons} name='gender-male' color='#62A0EA' width='15%'/>
+        else
+            return <Icon size="xl" as={MaterialCommunityIcons} name='gender-female' color='#DC8ADD' width='15%'/>
+    }
+    React.useEffect(() => {
+        if(!bkp){
+            dispatch(action.getHato(tkn));
+            console.log(hato);
+            dispatch(action.setBkpHato(hato));    
+        }
+    })
     return(
         <Box>
+            <Input onChangeText={(value) => resolvSearch(value)} placeholder="Buscar" borderWidth={1} variant="filled" width="100%" borderRadius="10" py="1" px="2" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
             <FlatList data={hato}  renderItem={({item}) => 
                 <Pressable onPress={() => toast.show({title:item.arete})}>
-                    <HStack borderBottomWidth="1">
-                        <Icon size="xl" as={MaterialCommunityIcons} name="cow"/>
-                        <VStack>
+                    <HStack borderBottomWidth="1" space='4' >
+                        <Icon size="xl" as={MaterialCommunityIcons} name="cow" width='20%'/>
+                        <VStack width="65%">
                             <Heading>{item.arete}</Heading>
                             <Text>{item.name}</Text>
                         </VStack>
-                    </HStack>             
+                        <SexIcon sex={item.sex}/>
+                    </HStack>  
+                               
                 </Pressable>
             }
             keyExtractor={item=>item.arete}
             />
+            
         </Box>
     )
 }

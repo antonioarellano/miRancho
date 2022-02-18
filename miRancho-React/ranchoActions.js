@@ -2,7 +2,7 @@
 const api = 'http://192.168.1.250/request/';
 
 export const getSession = (usr, pass) => {
-    return async dispatch => {
+    return async (dispatch) => {
         try{
             var formData = new FormData();
             formData.append('u',usr);
@@ -38,15 +38,43 @@ export const getPerfil = (tkn) => {
     }
 }
 export const getHato = (tkn) => {
-        fetch(api+'gHato.php',{
+    return async (dispatch) => {
+        try{
+        const response = await fetch(api+'gHato.php',{
             method: 'GET',
             headers: {'Authorization':'Bearer '+tkn}
-        }).then(res => res.json()).then(txt => {
-            console.log(txt);
-            setHato(txt);
-        }).catch(e => console.log(e))
-
-    
+        });
+        const hato = await response.json();
+        if(hato!=false)
+            dispatch(setHato(hato));
+        else
+            dispatch(setBkpHato(true));
+        }catch(error){
+            console.log(error);
+            return false;
+        }
+    }
+}
+export const searchAnimal = (search,hato) => {
+    return dispatch => {
+        var result =  Array();
+        for (const animal in hato) 
+            if (animal.arete.includes(search.word)||animal.name.includes(search.word))
+                result.push(animal);
+        dispatch(setHato(result));
+    }
+}
+export const setBkpHato = (animals) => { 
+    return {
+        type: '@set/bkpHato',
+        payload: {hato:animals}
+    }
+}
+export const setHato = (animals) => { 
+    return {
+        type: '@set/hato',
+        payload: {hato:animals}
+    }
 }
 const setSession = (session) =>{
     return {
@@ -60,12 +88,8 @@ const setPerfil = (perfil) =>{
         payload: {perfil:perfil}
     }
 }
-const setHato = (animals) => { 
-    return {
-        type: '@set/hato',
-        payload: {hato:animals}
-    }
-}
+
+
 const setControls = (controls) => {
     return {
         type: '@set/controls',
