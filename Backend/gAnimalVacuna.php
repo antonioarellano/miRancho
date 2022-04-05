@@ -13,19 +13,19 @@
             exit();
         }
         mysqli_set_charset($conexion, 'utf8mb4');
-        $sql = 'CALL gPERFIL(?);';
+        $sql = 'CALL gANIMAL_VACUNA(?);';
         $resultado = mysqli_prepare($conexion,$sql);
         $ok = mysqli_stmt_bind_param($resultado,'s',$id);
         $ok = mysqli_stmt_execute($resultado);
         if ($ok == false){
             echo 'Error al consultar';
         }else{
-            $ok = mysqli_stmt_bind_result($resultado,$username,$name,$address,$mail);
-            
+            $ok = mysqli_stmt_bind_result($resultado,$id,$vacuna,$arete);
+            $vacuna_animal = array();
             while(mysqli_stmt_fetch($resultado)){
-                $perfil = array(['id'=>'username','value'=>$username],['id'=>'name','value'=>$name],['id'=>'address','value'=>$address],['id'=>'mail','value'=>$mail]);
+                array_push($vacuna_animal,['id'=>$id,'vacuna'=>$vacuna,'arete'=>$arete]);
             }
-            echo json_encode($perfil);
+            echo json_encode($vacuna_animal);
         }
         mysqli_stmt_close($resultado);
     }else{

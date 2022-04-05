@@ -15,55 +15,36 @@ import * as screens from './screens';
 import { Provider } from 'react-redux';
 import Store from './ranchoStore';
 
-
 const NavLogin = createNativeStackNavigator();
-const NavConfig = createNativeStackNavigator();
-const NavEmbarque = createNativeStackNavigator();
 const NavRancho = createDrawerNavigator();
 const NavMain = createNativeStackNavigator();
 
-
 const Inicio = ({navigation}) => {
   return(          
-    <NavLogin.Navigator>
+    <NavLogin.Navigator screenOptions={{headerShown: false}} initialRouteName="getData">
+      <NavLogin.Screen options={{title: 'Cargando'}} name='getData' component={screens.GetRancho}/>
       <NavLogin.Screen options={{title: 'Mi Rancho'}} name='login' component={screens.LogIn}/>
       <NavLogin.Screen options={{title: 'Crear cuenta'}}name='singin' component={screens.SingIn}/>
       <NavLogin.Screen options={{title: 'Terminos y condiciones'}}name='terms' component={screens.Terms}/>
-      <NavLogin.Screen options={{title: 'Recuperar contraseña'}} name='recPass' component={screens.RecPass}/>
     </NavLogin.Navigator>
   );
 }
-const Embarques = ({navigation}) => {
-  return (
-    <NavEmbarque.Navigator>
-      <NavEmbarque.Screen options={{headerShown: false}} name='newEmbarque' component={screens.newEmbarque}/>
-      <NavEmbarque.Screen options={{title: ''}} name='setEmbarque' component={screens.setEmbarque}/>
-      <NavEmbarque.Screen options={{title: ''}} name='getEmbarque' component={screens.getEmbarque}/>
-    </NavEmbarque.Navigator>
-  );
-}
-const Configuracion = ({navigation}) => {
-  return (
-    <NavConfig.Navigator >
-      <NavConfig.Screen options={{headerShown: false}} name='Configuración' component={screens.Configuracion}/>
-      <NavConfig.Screen options={{title: ''}}name='setConfig' component={screens.setConfig}/>
-    </NavConfig.Navigator>
-  );
-}
+
 const Rancho = ({navigation}) => {
   return (
-    <NavRancho.Navigator initialRouteName="Ganado">
+    <NavRancho.Navigator initialRouteName="Perfil">
         <NavRancho.Screen name='Ganado' component={screens.Hato}/>
         <NavRancho.Screen name='Vacunas' component={screens.Vacunas}/>
-        <NavRancho.Screen name='Controles sanitarios' component={screens.ControlSan}/>
-        <NavRancho.Screen name='Controles reproductivos' component={screens.ControlRep}/>
-        <NavRancho.Screen name='Pesajes' component={screens.Pesaje}/>
-        <NavRancho.Screen name='Predios' component={screens.Predio}/>
-        <NavRancho.Screen name='Embarques' component={Embarques}/>
-        <NavRancho.Screen name='Configuración' component={Configuracion}/>
+        <NavRancho.Screen name='Sanitarios' component={screens.Sanitarios}/>
+        <NavRancho.Screen name='Embarazos' component={screens.Embarazos}/>
+        <NavRancho.Screen name='Pesajes' component={screens.Pesajes}/>
+        <NavRancho.Screen name='Predios' component={screens.Predios}/>
+        <NavRancho.Screen name='Embarques' component={screens.newEmbarque}/>
+        <NavRancho.Screen name='Configuración' component={screens.Configuracion}/>
     </NavRancho.Navigator>
   );
 }
+
 const store = Store();
 
 export default function App() {
@@ -72,9 +53,8 @@ export default function App() {
             <NativeBaseProvider>
               <NavigationContainer>
                 <NavLogin.Navigator screenOptions={{headerShown: false}}>
-                  
-                  <NavMain.Screen name='rancho' component={Rancho} />
                   <NavMain.Screen name='inicio' component={Inicio} />
+                  <NavMain.Screen name='rancho' component={Rancho} />
                 </NavLogin.Navigator>
               </NavigationContainer>
             </NativeBaseProvider>

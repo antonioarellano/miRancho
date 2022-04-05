@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast, Pressable, View} from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast, Pressable, View, AlertDialog, Spinner} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import NetInfo from "@react-native-community/netinfo";
@@ -28,7 +28,7 @@ export const LogIn = ({navigation}) => {
 
     React.useEffect(() => {
         if(session != false)
-            navigation.navigate('rancho');  
+            navigation.navigate('getData');  
     })
     const HandleLogin = () => {
         if(cntLogin > 10)
@@ -48,7 +48,8 @@ export const LogIn = ({navigation}) => {
     }
     return(
         < Box justifyContent='center'  flex= {1}>
-            <VStack><FormControl isRequired isInvalid={'user' in errors}>
+            <VStack>
+                <FormControl isRequired isInvalid={'user' in errors}>
                     <FormControl.Label>Nombre de Usuario</FormControl.Label>
                     <Input 
                         placeholder='Usuario'
@@ -58,9 +59,8 @@ export const LogIn = ({navigation}) => {
                     <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.user}</FormControl.ErrorMessage>:
                         <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                     }
-                
-            </FormControl></VStack>
-            <VStack>
+                </FormControl>
+
                 <FormControl isRequired isInvalid={'pass' in errors}>
                     <FormControl.Label>Contraseña</FormControl.Label>
                     <Input 
@@ -74,6 +74,7 @@ export const LogIn = ({navigation}) => {
                     }
                 </FormControl>
             </VStack>
+
             <Divider my={1}/>
             <Button colorScheme='success' onPress={HandleLogin} size = 'lg'>Entrar</Button>
             <Divider my={3}/>
@@ -84,7 +85,6 @@ export const LogIn = ({navigation}) => {
     );
 }
 
-/// IMPLEMENTAR EL RECAPTCHA DE GOOGLE V2
 //Screen SignIn
 export const SingIn = ({navigation}) => {
     const toast = useToast();
@@ -94,7 +94,6 @@ export const SingIn = ({navigation}) => {
     const [terms, setTerms] = React.useState(false);
     const [showModal, setShow] = React.useState(false);
     const [tkn, setTkn] = React.useState('');
-    const [captcha, setCaptcha] = React.useState('');
 
     const createUser = async () => {
         try {
@@ -113,8 +112,10 @@ export const SingIn = ({navigation}) => {
                     )
                 }
             );
-            const json = await response.json();
-            return json.user;
+            const msj = await response.text();
+            if (msj < 1)
+                navigation.navigate('login');
+                
         } catch (error) {
             return false;
         }
@@ -213,98 +214,100 @@ export const SingIn = ({navigation}) => {
               });
     }
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "height" : "", Platform.OS === 'web'? "":""} keyboardVerticalOffset={100} >
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "height" : ""} keyboardVerticalOffset={100} >
         <ScrollView>
         <Box justifyContent='center'  flex= {1}>
-            <VStack><FormControl isRequired isInvalid={'user' in errors}>
-                <FormControl.Label>Nombre de Usuario (Se sugiere usar la CURP)</FormControl.Label>
-                <Input 
-                    placeholder='Usuario'
-                    onChangeText={(value) => setData({...data, user:value})}
-                    maxLength={20}
-                />
-                {'user' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.user}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-
-            <VStack><FormControl isRequired isInvalid={'pass' in errors}>
-                <FormControl.Label>Contraseña</FormControl.Label>
-                <Input 
-                    p={2} 
-                    placeholder='Contraseña'
-                    onChangeText={(value) => setData({...data, pass:value})}
-                    type = 'password'
-                    
-                />
-                <Input
-                    p={2}
-                    placeholder='Confirmar contraseña'
-                    onChangeText={(value)=> {setData({...data, cpass:value})}}
-                    type = 'password'
-                />
-                {'pass' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.pass}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-            
-            <VStack><FormControl isRequired isInvalid={'name' in errors}>
-                <FormControl.Label>Nombre Completo</FormControl.Label>
-                <Input 
-                    p={2} 
-                    placeholder='Nombre'
-                    onChangeText={(value) => {setData({...data, name:value})}}
-                />
-                {'name' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.name}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Escriba nombre completo</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-
-            <VStack><FormControl isRequired isInvalid={'address' in errors}>
-            <FormControl.Label>Domicilio</FormControl.Label>
-            <Input 
-                p={2} 
-                placeholder='Domicilio'
-                onChangeText={(value) => {setData( {...data,address:value})}}
-            />
-
-            {'address' in errors ?
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.address}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Agregue un domicilio</FormControl.HelperText>
-                }
-            </FormControl></VStack>
-            
-            <VStack><FormControl isRequired isInvalid={'mail' in errors}>
-                <FormControl.Label>Correo electrónico</FormControl.Label>
-                <Input 
-                    p={2} 
-                    keyboardType='email-address'
-                    placeholder='Correo'
-                    onChangeText={(value) => setData( {...data,mail:value})}
-                />
-                {'mail' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.mail}</FormControl.ErrorMessage>:
+            <VStack>
+                <FormControl isRequired isInvalid={'user' in errors}>
+                    <FormControl.Label>Nombre de Usuario (Se sugiere usar la CURP)</FormControl.Label>
+                    <Input 
+                        placeholder='Usuario'
+                        onChangeText={(value) => setData({...data, user:value})}
+                        maxLength={20}
+                    />
+                    {'user' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.user}</FormControl.ErrorMessage>:
                         <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                }
-            </FormControl></VStack>
+                    }
+                </FormControl>
 
-            <VStack><FormControl isRequired isInvalid={'terms' in errors}>
-                <Checkbox  size = 'md' onChange={(value) => setTerms(value)}>
-                    Aceptar 
-                    <Link onPress={()=>navigation.navigate('terms')}>  terminos y condiciones de uso</Link>
-                </Checkbox>
-                {'terms' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.terms}</FormControl.ErrorMessage>:
-                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Es necesario aceptar</FormControl.HelperText>
-                } 
-            </FormControl></VStack>
+                <FormControl isRequired isInvalid={'pass' in errors}>
+                    <FormControl.Label>Contraseña</FormControl.Label>
+                    <Input 
+                        p={2} 
+                        placeholder='Contraseña'
+                        onChangeText={(value) => setData({...data, pass:value})}
+                        type = 'password'
+                        
+                    />
+                    <Input
+                        p={2}
+                        placeholder='Confirmar contraseña'
+                        onChangeText={(value)=> {setData({...data, cpass:value})}}
+                        type = 'password'
+                    />
+                    {'pass' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.pass}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                </FormControl>
+            
+                <FormControl isRequired isInvalid={'name' in errors}>
+                    <FormControl.Label>Nombre Completo</FormControl.Label>
+                    <Input 
+                        p={2} 
+                        placeholder='Nombre'
+                        onChangeText={(value) => {setData({...data, name:value})}}
+                    />
+                    {'name' in errors ?
+                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.name}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Escriba nombre completo</FormControl.HelperText>
+                    }
+                </FormControl>
 
-            <Divider my={2}/>
-            <Button colorScheme='success' size = 'lg' onPress={HandleRegister}>Registrar</Button>
+                <FormControl isRequired isInvalid={'address' in errors}>
+                    <FormControl.Label>Domicilio</FormControl.Label>
+                    <Input 
+                        p={2} 
+                        placeholder='Domicilio'
+                        onChangeText={(value) => {setData( {...data,address:value})}}
+                    />
+
+                    {'address' in errors ?
+                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.address}</FormControl.ErrorMessage>:
+                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Agregue un domicilio</FormControl.HelperText>
+                        }
+                </FormControl>
+            
+                <FormControl isRequired isInvalid={'mail' in errors}>
+                    <FormControl.Label>Correo electrónico</FormControl.Label>
+                    <Input 
+                        p={2} 
+                        keyboardType='email-address'
+                        placeholder='Correo'
+                        onChangeText={(value) => setData( {...data,mail:value})}
+                    />
+                    {'mail' in errors ?
+                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.mail}</FormControl.ErrorMessage>:
+                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                    }
+                </FormControl>
+
+                <FormControl isRequired isInvalid={'terms' in errors}>
+                    <Checkbox  size = 'md' onChange={(value) => setTerms(value)}>
+                        Aceptar 
+                        <Link onPress={()=>navigation.navigate('terms')}>  terminos y condiciones de uso</Link>
+                    </Checkbox>
+                    {'terms' in errors ?
+                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.terms}</FormControl.ErrorMessage>:
+                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Es necesario aceptar</FormControl.HelperText>
+                    } 
+                </FormControl>
+                <Divider my={2}/>
+                <Button colorScheme='success' size = 'lg' onPress={HandleRegister}>Registrar</Button>
+            </VStack>
         </Box>
+
         <Modal isOpen={showModal} onClose={() => setShow(false)}>
             <Modal.Content>
                 <Modal.CloseButton />
@@ -353,32 +356,53 @@ export const Terms = ({navigation}) => {
         </NativeBaseProvider>
     );
 }
-//Screen recoverPass
-export const RecPass = ({navigation}) => {
-    const [data,setData] = React.useState('');
-    return(
-        <Box>
-            <FormControl>
-                <FormControl.Label>Ingrese su usuario</FormControl.Label>
-                <Input placeholder = 'Usuario' value = {data} onChangeText= {(value)=>setData(value)}/>
-            </FormControl>
-            <Button colorScheme='success'>Restablecer contraseña</Button>
-        </Box>
-    );
-}
-//Screen newPass
-export const newPass = ({navigation}) => {
-    const [pass,setPass] = React.useState('');
-    const [cPass,setCpass] = React.useState('');
-    return (
-        <Box>
-            
-        </Box>
-    );
 
+//Screen getData-Rancho
+export const GetRancho = ({navigation}) => {
+    const tkn = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTAzOTQ0MTgsInVzZXIiOiJwcnVlYmEifQ.E-GqgWjS4L7YpdOXObgySX4XgwFMyxOqtXtEoxKmEGQ';
+    const [show, setShow] = React.useState(false);
+    const dispatch = useDispatch();
+    const errors = useSelector((state) =>state.errors);
+    const toast = useToast();
+    const getData = () => {
+        NetInfo.fetch().then((state) => { 
+            if(state.isConnected)
+                dispatch(action.getPerfil(tkn)).then(msj => {
+                    if(msj != false)
+                        navigation.navigate('rancho');
+                    else
+                        toast.show({title:'Error con el servidor',status:'warning' ,description:'Intente de nuevo'});
+                })
+            else
+                setShow(true);
+        })
+    }
+    React.useEffect(() => {getData()},[]);
+        
+    return (
+        <Box justifyContent='center'  flex= {1}>
+            <VStack justifyContent="center" alignItems="center" space={2}>
+                <Spinner color="cyan.500" size='lg' />
+                <Heading color="primary.500" fontSize="md">
+                    Cargando...
+                </Heading>
+            </VStack>
+            
+            <Modal isOpen={show} onClose={()=>{setShow(false)}} bgColor='red.400' >
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header> No hay conexion!</Modal.Header>
+                    <Modal.Body>
+                        Porfavor intente de nuevo, hubo un problema con la red.
+                    </Modal.Body>
+                </Modal.Content>
+            </Modal>
+        </Box> 
+    );
 }
- 
 // Navegacion "Rancho" //
+
+
 
 //Screen Ganado
 
@@ -387,11 +411,16 @@ export const Hato = ({navigation}) => {
     // useSelector((state)=>state.jwt);
     const hato = useSelector((state)=> state.hato);
     const bkp = useSelector((state) => state.bkpHato);
+    const mt = useSelector((state) => state.mtr.hato);
     const dispatch = useDispatch();
-    const toast = useToast();
     const [search, setSearch] = React.useState('');
+
+    const [show, setShow] = React.useState({animal:false,register:false,delete:false,vac:false,pesaje:false,rep:false,san:false})   
+    const [showPop, setPop] = React.useState({name:false,nac:false,date:false,sex:false,race:false,color:false});
+    
     const [animal, setAnimal] = React.useState({});
-    const [showAnimal,setShow] = React.useState(false);
+    const [form, setForm] = React.useState({show:false,nac:'YYYY-MM-DD'});
+    const [errors, setError] = React.useState({});
 
     const SexIcon = props =>{
         let { sex } = props;
@@ -400,10 +429,7 @@ export const Hato = ({navigation}) => {
         else
             return <Icon size="xl" as={MaterialCommunityIcons} name='gender-female' color='#DC8ADD' width='15%'/>
     }
-    React.useEffect(() => {
-        if(bkp == false)
-            dispatch(action.getHato(tkn)); 
-    })
+
     const filtrar = (search) => {
         var resultado = bkp.filter((animal)=>{
             if(animal.arete.toString().toLowerCase().includes(search.toString().toLowerCase()) || animal.name.toString().toLowerCase().includes(search.toString().toLocaleLowerCase()))
@@ -419,10 +445,19 @@ export const Hato = ({navigation}) => {
         setAnimal(item);
         setShow(true);
     }
+    const handleUpdate =(type) => {
+        console.log(type);
+    }
     return(
         <View>
             <Box>
-                <Input onChangeText={handleSearch} value={search}placeholder="Buscar" borderWidth={1} variant="filled" width="100%" borderRadius="10" py="1" px="2" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
+                <HStack space={2}>
+                    <Input onChangeText={handleSearch} value={search}placeholder="Buscar" variant="filled" width="80%" borderRadius="10" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
+                    <IconButton width='15%' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
+                        icon={<Icon  as={MaterialCommunityIcons} name="plus"/>}
+                        onPress={()=>setShowReg(true)}
+                    />
+                </HStack>
                 <FlatList data={hato}  renderItem={({item}) => 
                     <Pressable onPress={() => handleAnimal(item)}>
                         <HStack borderBottomWidth="1" space='4' >
@@ -437,423 +472,636 @@ export const Hato = ({navigation}) => {
                 }
                 keyExtractor={item=>item.arete}
                 />
-                
+                <Text>{mt}</Text>             
             </Box>
-            <Modal isOpen={showAnimal} onClose={() => setShow(false)}>
-            <Modal.Content>
-                <Modal.CloseButton />
-                <Modal.Header alignSelf="center" _text={{fontSize:'xl',Overridden:'bold'}}>{animal.arete}</Modal.Header>
-                <Modal.Body size='full'>
-                    <VStack >
-                        <Pressable onPress={()=>toast.show({title:animal.name})}>
-                            <Text fontSize='2xs'>Nombre</Text>
-                            <Text fontSize='md'>{animal.name}</Text>
-                            <Divider />
-                        </Pressable>
-                        <Pressable>
-                            <Text fontSize='2xs'>Nacimiento</Text>
-                            <Text>{animal.nac}</Text>
-                            <Divider/>
-                        </Pressable>
-                        <Pressable>
-                            <Text fontSize='2xs'>Sexo</Text>
-                            <Text fontSize='md'>{animal.sex}</Text>
-                            <Divider />
-                        </Pressable>
-                        <Pressable>
-                            <Text fontSize='2xs'>Raza</Text>
-                            <Text fontSize='md'>{animal.race}</Text>
-                            <Divider />
-                        </Pressable>
-                        <Pressable>
-                            <Text fontSize='2xs'>Color</Text>
-                            <Text fontSize='md'>{animal.color}</Text>
+            
+            <Modal isOpen={show.animal} onClose={() => setShow({...show,animal:false})} size='full'>
+                <Modal.Content >
+                    <Modal.CloseButton />
+                    <Modal.Header alignSelf="center" _text={{fontSize:'xl',Overridden:'bold'}}>{animal.arete}</Modal.Header>
+                    <Modal.Body >
+                        <VStack >
+                            <Pressable onPress={() => setPop({...showPop,name:true})}>
+                                <Text fontSize='2xs'>Nombre</Text>
+                                <Text fontSize='md'>{animal.name}</Text>
+                                <Divider />
+                            </Pressable> 
+                            <Modal isOpen={showPop.name} onClose={() => setPop({...showPop,name:false})} size='xl'>
+                                <Modal.Content >
+                                    <Modal.Header alignContent='center'>Actualizar nombre</Modal.Header>
+                                    <Modal.Body>
+                                        <FormControl>
+                                            <Input placeholder='Nuevo nombre' onChangeText={(value)=>{setForm({...form,name:value})}}/>
+                                        </FormControl>
+                                    </Modal.Body>
+                                    <Modal.Footer >
+                                        <Button.Group space={2}>
+                                            <Button colorScheme="coolGray" variant="ghost" onPress={()=>setPop({...showPop,name:false})}> 
+                                                Cancel
+                                            </Button>
+                                            <Button colorScheme="warning" onPress={()=>handleUpdate('name')}>Actualizar</Button>
+                                        </Button.Group>
+                                    </Modal.Footer>
+                                </Modal.Content>
+                            </Modal>
+
+                            <Pressable  onPress={() => setPop({...showPop,nac:true})}>
+                                <Text fontSize='2xs'>Nacimiento</Text>
+                                <Text fontSize='md'>{animal.nac}</Text>
+                                <Divider />
+                            </Pressable>        
+                            {showPop.nac && (
+                                <DateTimePicker
+                                    value={new Date(animal.nac)}
+                                    mode='date'
+                                    display="default"
+                                    onChange={(event, selectedDate) => {
+                                        const f = selectedDate;
+                                        const currentDate = f.getFullYear() + "-"+ f.getMonth()+ "-" +f.getDate();
+                                        setForm({...form,nac:currentDate});
+                                        console.log(currentDate);
+                                        setPop({...showPop,nac:false});
+                                    }}
+                                />
+                            )}
+                                   
+                            <Pressable  onPress={() => setPop({...showPop,sex:true})}>
+                                <Text fontSize='2xs'>Sexo</Text>
+                                <Text fontSize='md'>{animal.sex}</Text>
+                                <Divider />
+                            </Pressable>    
+                            <Modal isOpen={showPop.sex} onClose={() => setPop({...showPop,sex:false})} size='xl'>                    
+                                <Modal.Content >
+                                    <Modal.Header alignContent='center'>Actualizar sexo</Modal.Header>
+                                    <Modal.Body>
+                                        <FormControl>
+                                            <Select
+                                                selectedValue={form.sex}
+                                                onValueChange={(itemValue) => setForm({...form, sex:itemValue})}
+                                            >
+                                                <Select.Item label="Macho" value="M" />
+                                                <Select.Item label="Hembra" value="H" />
+                                            </Select>
+                                        </FormControl>
+                                    </Modal.Body>
+                                    <Modal.Footer justifyContent="flex-end">
+                                        <Button.Group space={2}>
+                                            <Button colorScheme="coolGray" variant="ghost" onPress={()=>setPop({...showPop,sex:false})}> 
+                                                Cancel
+                                            </Button>
+                                            <Button colorScheme="warning" onPress={()=>handleUpdate('sex')}>Actualizar</Button>
+                                        </Button.Group>
+                                    </Modal.Footer>
+                                </Modal.Content>
+                            </Modal>
+
+                            <Pressable onPress={() => setPop({...showPop,race:true})}>
+                                <Text fontSize='2xs'>Raza</Text>
+                                <Text fontSize='md'>{animal.race}</Text>
+                                <Divider />
+                            </Pressable>    
+                            <Modal isOpen={showPop.race} onClose={() => setPop({...showPop,race:false})} size='xl'>
+                                <Modal.Content >
+                                    <Modal.Header alignContent='center'>Actualizar raza</Modal.Header>
+                                    <Modal.Body>
+                                        <FormControl>
+                                            <Input placeholder='Nueva raza' onChangeText={(value)=>{setForm({...form,race:value})}}/>
+                                        </FormControl>
+                                    </Modal.Body>
+                                    <Modal.Footer justifyContent="flex-end">
+                                        <Button.Group space={2}>
+                                            <Button colorScheme="coolGray" variant="ghost" onPress={()=>setPop({...showPop,race:false})}> 
+                                                Cancel
+                                            </Button>
+                                            <Button colorScheme="warning" onPress={()=>handleUpdate('race')}>Actualizar</Button>
+                                        </Button.Group>
+                                    </Modal.Footer>
+                                </Modal.Content>
+                            </Modal>
+
+                            <Pressable onPress={() => setPop({...showPop,color:true})}>
+                                <Text fontSize='2xs'>Color</Text>
+                                <Text fontSize='md'>{animal.color}</Text>
+                                <Divider />
+                            </Pressable>    
+                            <Modal isOpen={showPop.color} onClose={() => setPop({...showPop,color:false})} size='xl'>
+                                <Modal.Content>
+                                    <Modal.Header alignContent='center'>Actualizar color</Modal.Header>
+                                    <Modal.Body>
+                                        <FormControl>
+                                            <Input placeholder='Nuevo color' onChangeText={(value)=>{setForm({...form,color:value})}}/>
+                                        </FormControl>
+                                    </Modal.Body>
+                                    <Modal.Footer justifyContent="flex-end">
+                                        <Button.Group space={2}>
+                                            <Button colorScheme="coolGray" variant="ghost" onPress={()=>setPop({...showPop,color:false})}> 
+                                                Cancel
+                                            </Button>
+                                            <Button colorScheme="warning" onPress={()=>handleUpdate('color')}>Actualizar</Button>
+                                        </Button.Group>
+                                    </Modal.Footer>
+                                </Modal.Content>
+                            </Modal>
                             
-                        </Pressable>
-                    </VStack>
-                </Modal.Body>
-                <Modal.Footer>
+                        </VStack>
+                        
+                        <Button.Group colorScheme="info" my ={2} direction='column'>
+                            <HStack space='sm'>
+                                <Button colorScheme='rgb(0, 154, 159)' _text={{color:'white'}} leftIcon={<Icon size="md" as={MaterialCommunityIcons} name="dna"/>}>Registros reproductivos</Button>
+                                <Button colorScheme='rgb(0, 154, 159)' _text={{color:'white'}} leftIcon={<Icon size="md" as={MaterialCommunityIcons} name="needle"/>}>Vacunas</Button>
+                            </HStack>
+                            <HStack space='sm'>
+                                <Button width='40%' colorScheme='rgb(0, 154, 159)' _text={{color:'white'}} leftIcon={<Icon size="md" as={MaterialCommunityIcons} name="weight"/>}>Pesajes</Button>
+                                <Button colorScheme='rgb(0, 154, 159)' _text={{color:'white'}} leftIcon={<Icon size="md" as={MaterialCommunityIcons} name="virus"/>}>Controles sanitarios</Button>
+                            </HStack>
+                        </Button.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button.Group space={2}>
+                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
+                                Cancelar
+                            </Button >
+                            <Button size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}} onPress={() => {setShowDel(true);
+                            }}>
+                                Borrar
+                            </Button>
+                        </Button.Group>
+                    </Modal.Footer>
+
+                    <AlertDialog  isOpen={show.delete} onClose={()=>setShow({...show,delete:false})}>
+                        <AlertDialog.Content>
+                            <AlertDialog.CloseButton />
+                            <AlertDialog.Header>Borrar animal</AlertDialog.Header>
+                            <AlertDialog.Body>
+                                Esto borrará todos los datos relacionados con este animal. 
+                                Esta acción no es reversible. 
+                                Los datos borrados no podrán ser recuperados.
+                                ¿Está seguro de esta acción?
+                            </AlertDialog.Body>
+                            <AlertDialog.Footer>
+                                <Button.Group space={2}>
+                                <Button variant="unstyled" colorScheme="coolGray" onPress={()=>setShow({...show,delete:false})}>
+                                    Cancelar
+                                </Button>
+                                <Button  size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
+                                    Confirmar 
+                                </Button>
+                                </Button.Group>
+                            </AlertDialog.Footer>
+                        </AlertDialog.Content>
+                    </AlertDialog>
+
+                    <Modal isOpen={show.vac} onClose={() => setShow({...show,vac:false})} size='full'>
+                        <Modal.Content>
+                            <Modal.CloseButton/>
+                            <Modal.Header>Registros de vacunación</Modal.Header>
+                            <Modal.Body>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <Button.Group space={2}>
+
+                                </Button.Group>
+                            </Modal.Footer>    
+                        </Modal.Content>
+                    </Modal>
+                </Modal.Content>
+            </Modal>
+
+            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})} size='full' >
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header alignContent='center'>Registrar animal</Modal.Header>
+                    <Modal.Body>
+                        <VStack>
+                            <FormControl isInvalid={'arete' in errors}>
+                                <FormControl.Label>Arete</FormControl.Label>
+                                <Input
+                                    placeholder='Arete - ID'
+                                    onChangeText = {(value) => setForm({...form, arete:value})}
+                                />
+                                {'arete' in errors ?
+                                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.arete}</FormControl.ErrorMessage>:
+                                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                                }
+                            </FormControl>
+                            <FormControl isInvalid={'nombre' in errors}>
+                                <FormControl.Label>Nombre</FormControl.Label>
+                                <Input
+                                    placeholder='Nombre'
+                                    onChangeText = {(value) => setForm({...form, name:value})}
+                                />
+                                {'nombre' in errors ?
+                                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.nombre}</FormControl.ErrorMessage>:
+                                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                                }
+                            </FormControl>
+                            <FormControl isInvalid={'sexo' in errors}>
+                                <FormControl.Label>Sexo</FormControl.Label>
+                                    <Radio.Group
+                                    name="sexo"
+                                    accessibilityLabel="sexo"
+                                    value={form.sex}
+                                    onChange={(nextValue) => {
+                                        setForm({...form, sex:nextValue})
+                                    }}
+                                    >
+                                        <Radio value="M" my={1}>
+                                            Masculino
+                                        </Radio>
+                                        <Radio value="F" my={1}>
+                                            Femenino
+                                        </Radio>
+                                    </Radio.Group>
+                                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.sexo}</FormControl.ErrorMessage>
+                            </FormControl>
+                        
+                            <FormControl isInvalid={'fecha' in errors}>
+                                <FormControl.Label>Fecha de nacimiento</FormControl.Label>
+                                <Pressable onPress={()=> setForm({...form,show:true})}>
+                                    <Text>{form.nac}</Text>
+                                </Pressable>
+                                {form.show && (
+                                <DateTimePicker
+                                    value={new Date()}
+                                    mode='date'
+                                    display="default"
+                                    onChange={(event, selectedDate) => {
+                                        const f = selectedDate;
+                                        const currentDate = f.getFullYear() + "-"+ (f.getMonth()+1) + "-" +f.getDate();
+                                        setForm({...form,nac:currentDate,show:false});
+                                    }}
+                                />
+                            )}
+                                
+                                <FormControl.ErrorMessage>{errors.fecha}</FormControl.ErrorMessage>
+                            </FormControl>
+
+                            <FormControl isInvalid={'raza' in errors}>
+                                <FormControl.Label>Raza</FormControl.Label>
+                                <Input
+                                    placeholder='Raza'
+                                    onChangeText = {(value) => setForm({...form, race:value})}
+                                />
+                                {'raza' in errors ?
+                                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.raza}</FormControl.ErrorMessage>:
+                                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                                }
+                            </FormControl>
+                            <FormControl isInvalid={'color' in errors}>
+                                <FormControl.Label>Color</FormControl.Label>
+                                <Input
+                                    placeholder='Color'
+                                    onChangeText = {(value) => setForm({...form, color:value})}
+                                />
+                                {'color' in errors ?
+                                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.color}</FormControl.ErrorMessage>:
+                                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                                }
+                            </FormControl>
+                            <FormControl isInvalid={'predio' in errors}>
+                                <FormControl.Label>Predio</FormControl.Label>
+                                <Input
+                                    placeholder='Predio'
+                                    onChangeText = {(value) => setForm({...form, predio:value})}
+                                />
+                                {'predio' in errors ?
+                                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.predio}</FormControl.ErrorMessage>:
+                                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
+                                }
+                            </FormControl>
+                        </VStack>
+                    </Modal.Body>
+                    <Modal.Footer>
                     <Button.Group space={2}>
-                        <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {
-                        setShow(false);
-                        }}>
-                            Cancelar
-                        </Button >
-                        <Button onPress={() => {
-                        setShow(false);
-                        }}>
-                            Verificar
-                        </Button>
-                    </Button.Group>
-                </Modal.Footer>
-            </Modal.Content>
-        </Modal>
+                            <Button colorScheme="coolGray" variant="ghost" onPress={()=>setShow({...show,register:false})}> 
+                                Cancel
+                            </Button>
+                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}}onPress={()=>handleUpdate('name')}>Crear</Button>
+                        </Button.Group>
+                    </Modal.Footer>
+                </Modal.Content>
+            </Modal>
         </View>
     )
 }
 
-var animal = {
-    arete:'',
-    nombre:'',
-    sexo:'',
-    fecha:new Date(),
-    raza:'',
-    color:'',
-    predio:'',
-}
-export const Ganado = ({navigation}) => {
-    const [key, setKey] = React.useState({type:'arete',word:''})
-    const [data,setData] = React.useState(animal)
-    const [errors, setErrors] = React.useState({})
-    return (
-        <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
-            <ScrollView >
-                <Box alignItems="center" bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
-                    <FormControl isInvalid={'search' in errors}>
-                        <FormControl.Label>Busqueda</FormControl.Label>
-                            <Select
-                                selectedValue={key.type}
-                                onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-                            >
-                                <Select.Item label="Nombre" value="nombre" />
-                                <Select.Item label="Arete" value="arete" />
-                            </Select>
-                    
-                            <Input 
-                                placeholder={key.type}
-                                onChangeText={(value) => setkey({...key, word:value})}
-                            />
-                            {'key' in errors ?
-                            <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
-                                <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                            }
-                            <Button colorScheme="teal" >Buscar</Button>
-                    </FormControl>
-                </Box>
-                <Divider my={1} />
-                 <Box>
-                <VStack><FormControl isInvalid={'arete' in errors}>
-                    <FormControl.Label>Arete</FormControl.Label>
-                    <Input
-                        placeholder={data.arete}
-                        //onChangeText = {(value) => setData({...data, arete:value})}
-                    />
-                    {'arete' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.arete}</FormControl.ErrorMessage>:
-                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                    }
-                </FormControl></VStack>
 
-                <VStack><FormControl isInvalid={'nombre' in errors}>
-                    <FormControl.Label>Nombre</FormControl.Label>
-                    <Input
-                        placeholder={data.nombre}
-                        onChangeText = {(value) => setData({...data, nombre:value})}
-                    />
-                    {'nombre' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.nombre}</FormControl.ErrorMessage>:
-                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                    }
-                </FormControl></VStack>
-
-                <VStack><FormControl isInvalid={'sexo' in errors}>
-                    <FormControl.Label>Sexo</FormControl.Label>
-                        <Radio.Group
-
-                        name="sexo"
-                        accessibilityLabel="sexo"
-                        value={data.sexo}
-                        onChange={(nextValue) => {
-                            setData({...data, sexo:nextValue})
-                        }}
-                        >
-                            <Radio value="M" my={1}>
-                                Masculino
-                            </Radio>
-                            <Radio value="F" my={1}>
-                                Femenino
-                            </Radio>
-                        </Radio.Group>
-                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.sexo}</FormControl.ErrorMessage>
-                </FormControl></VStack>
-                
-                <VStack><FormControl isInvalid={'fecha' in errors}>
-                    <FormControl.Label>Fecha de nacimiento</FormControl.Label>
-                    <DateTimePicker value={data.fecha} onChange={(event, selectedDate) => setData({...data, fecha:selectedDate})} />
-                    <FormControl.ErrorMessage>{errors.fecha}</FormControl.ErrorMessage>
-                </FormControl></VStack>
-
-                <VStack><FormControl isInvalid={'raza' in errors}>
-                    <FormControl.Label>Raza</FormControl.Label>
-                    <Input
-                        placeholder={data.raza}
-                        onChangeText = {(value) => setData({...data, raza:value})}
-                    />
-                    {'raza' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.raza}</FormControl.ErrorMessage>:
-                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                    }
-                </FormControl></VStack>
-
-
-                <VStack><FormControl isInvalid={'color' in errors}>
-                    <FormControl.Label>Color</FormControl.Label>
-                    <Input
-                        placeholder={data.color}
-                        onChangeText = {(value) => setData({...data, color:value})}
-                    />
-                    {'color' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.color}</FormControl.ErrorMessage>:
-                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                    }
-                </FormControl></VStack>
-
-
-                <VStack><FormControl isInvalid={'predio' in errors}>
-                    <FormControl.Label>Predio</FormControl.Label>
-                    <Input
-                        placeholder={data.predio}
-                        onChangeText = {(value) => setData({...data, predio:value})}
-                    />
-                    {'predio' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.predio}</FormControl.ErrorMessage>:
-                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                    }
-                </FormControl></VStack>
-                
-                <Center>
-                
-                <Divider my={1}/>
-                <Button.Group > 
-                    <Button colorScheme="success">Crear</Button>
-                    <Button colorScheme="warning">Actualizar</Button>
-                    <Button colorScheme="danger">Eliminar</Button>
-                </Button.Group>
-                </Center>
-                <Divider my={2}/>
-                <Button.Group colorScheme="info" direction="column" variant="outline">
-                    <Button >Registro de vacunación</Button>
-                    <Button >Control Reproductivo</Button>
-                    <Button >Historial de pesajes</Button>
-                    <Button >Control Sanitario</Button>
-                </Button.Group>
-                </Box>
-            </ScrollView>
-            </KeyboardAvoidingView>
-    );
-}
 //Screen Vacunas
-var vacuna = {
-    codigo:'',
-    nombre:'',
-    fecha: new Date(),
-}
+
 export const Vacunas = ({navigation }) => {
-    const [key, setKey] = React.useState({type:'nombre',word:''})
-    const [data,setData] = React.useState(vacuna)
-    const [errors, setErrors] = React.useState({})
-    const user = React.useContext(UserContext)
+
+    const [form,setForm] = React.useState({});
+    const [errors, setErrors] = React.useState({});
+    const [show, setShow] = React.useState({vacuna:false,register:false,delete:false,animals:false});
+    const [showPop, setPop] = React.useState({id:false,name:false,date:false});
+    const [search, setSearch] = React.useState('');
+    const [vacuna, setVacuna] = React.useState({id:0,name:'N/A',date:new Date()});
+
+    const mt = useSelector((state) => state.mtr.vacunas);
+    const vacunas = useSelector((state)=> state.vacunas);
+    const bkp = useSelector((state) => state.bkpVacunas);
+
+    const dispatch = useDispatch();
+    
+    const filtrar = (search) => {
+        var resultado = bkp.filter((vacuna)=>{
+            if(vacuna.name.toString().toLowerCase().includes(search.toString().toLowerCase()))
+                return vacuna;
+        });
+        dispatch(action.setVacunas(resultado));
+    }
+    const handleSearch = txt => {
+        setSearch(txt);
+        filtrar(txt);
+    }
+    const handleVacuna = (item) =>{
+        setShow({...show,vacuna:true});
+    }
+    const handleUpdate =(type) => {
+        console.log(type);
+    }
     return (
-        <ScrollView>
-            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
-                <FormControl>
-                    <FormControl.Label>Busqueda</FormControl.Label>
-                    <Select
-                        selectedValue={key.type}
-                        placeholder={key.type}
-                        mt={1}
-                        onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-                    >   
-                        <Select.Item label="Nombre" value="nombre" />
-                        <Select.Item label="Codigo" value="codigo" />
-                    </Select>
-                
-                    <Input 
-                        placeholder={key.type}
-                        onChangeText={(value) => setkey({...key, word:value})}
+        <View>
+            <Box>
+                <HStack space={2}>
+                    <Input onChangeText={handleSearch} value={search}placeholder="Buscar" variant="filled" width="80%" borderRadius="10" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
+                    <IconButton width='15%' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
+                        icon={<Icon  as={MaterialCommunityIcons} name="plus"/>}
+                        onPress={()=>setShowReg(true)}
                     />
-                    {'key' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
-                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                    }
-                </FormControl>
-                <Button colorScheme='teal'>Buscar</Button>
+                </HStack>
+                <FlatList data={vacunas}  renderItem={({item}) => 
+                    <Pressable onPress={() => handleVacuna(item)}>
+                        <HStack borderBottomWidth="1" space='4' >
+                            <Icon size="xl" as={MaterialCommunityIcons} name="needle" width='20%'/>
+                            <VStack width="65%">
+                                <Heading>{item.id}</Heading>
+                                <Text>{item.name}</Text>
+                            </VStack>
+                        </HStack>               
+                    </Pressable>
+                }
+                keyExtractor={item=>item.id}
+                />
+                <Text>{mt}</Text>             
             </Box>
 
-            <VStack><FormControl isInvalid={'codigo' in errors}>
-                <FormControl.Label>Codigo</FormControl.Label>
-                <Input
-                    placeholder='Codigo'
-                    onChangeText={(value) => setData({...data, codigo:value})}
-                />
-            </FormControl></VStack>
+            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})}>
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header>Registrar vacuna</Modal.Header>
+                    <Modal.Body>
+                        <VStack>
+                            <FormControl isInvalid={'name' in errors}>
+                                <FormControl.Label>Nombre</FormControl.Label>
+                                <Input
+                                    placeholder='Nombre'
+                                    onChangeText={(value) => setData({...data, nombre:value})}
+                                />
+                                {
+                                    'name' in errors ? 
+                                        <FormControl.ErrorMessage>{errors.name}</FormControl.ErrorMessage>:
+                                            <FormControl.HelperText></FormControl.HelperText>
+                                }
+                            </FormControl>
 
-            <VStack><FormControl isInvalid={'nombre' in errors}>
-                <FormControl.Label>Nombre</FormControl.Label>
-                <Input
-                    placeholder='Nombre'
-                    onChangeText={(value) => setData({...data, nombre:value})}
-                />
-            </FormControl></VStack>
+                            <FormControl isInvalid={'fecha' in errors}>
+                                <FormControl.Label>Fecha de aplicación</FormControl.Label>
 
-            <VStack><FormControl isInvalid={'fecha' in errors}>
-                <FormControl.Label>Fecha de aplicación</FormControl.Label>
-                <DateTimePicker value={data.fecha} onChange={(event,currentDate) => setData({...data, fecha:currentDate})} />
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>
-            </FormControl></VStack>
-            <Button colorScheme='info' variant='outline'>Ver hato vacunado</Button>
-            <Divider my={1}/>
-            <Center>
-                <Button.Group>
-                    <Button colorScheme='success'>Crear</Button>
-                    <Button colorScheme='warning'>Actualizar</Button>
-                    <Button colorScheme='danger'>Borrar</Button>
-                </Button.Group>
-            </Center>
-            
-            
-        </ScrollView>
+
+                            </FormControl>
+                        </VStack>
+                    </Modal.Body>
+                    <Modal.Footer>
+
+                    </Modal.Footer>
+                
+                    <Modal.Footer>
+                        <Button.Group space={2}>
+                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
+                                Cancelar
+                            </Button >
+                            <Button size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}} onPress={() => {setShowDel(true);
+                            }}>
+                                Borrar
+                            </Button>
+                        </Button.Group>
+                    </Modal.Footer> 
+                </Modal.Content> 
+            </Modal>
+        </View>
     );
 
 }
 
 //Screen Sanitario
-var ctlSanitario = {
-    codigo:'',
-    nombre:'',
-    fecha: new Date(),
-}
-export const ControlSan = ({navigation}) =>{
-    const [key, setKey] = React.useState({type:'nombre',word:''})
-    const [data,setData] = React.useState(ctlSanitario)
-    const [errors, setErrors] = React.useState({})
-    const user = React.useContext(UserContext)
+export const Sanitarios= ({navigation}) =>{
+    const [form,setForm] = React.useState({});
+    const [errors, setErrors] = React.useState({});
+    const [show, setShow] = React.useState({sanitario:false,register:false,delete:false,animals:false});
+    const [showPop, setPop] = React.useState({id:false,name:false,date:false});
+    const [search, setSearch] = React.useState('');
+    const [sanitario, setSanitario] = React.useState({id:0,name:'N/A',date:new Date()});
+
+    const mt = useSelector((state) => state.mtr.sanitarios);
+    const sanitarios = useSelector((state)=> state.sanitarios);
+    const bkp = useSelector((state) => state.bkpSanitarios);
+
+    const dispatch = useDispatch();
+    
+    const filtrar = (search) => {
+        var resultado = bkp.filter((sanitario)=>{
+            if(sanitario.name.toString().toLowerCase().includes(search.toString().toLowerCase()))
+                return sanitario;
+        });
+        dispatch(action.setSanitarios(resultado));
+    }
+    const handleSearch = txt => {
+        setSearch(txt);
+        filtrar(txt);
+    }
+    const handleSanitario = (item) =>{
+        setShow({...show,sanitario:true});
+    }
+    const handleUpdate =(type) => {
+        console.log(type);
+    }
     return (
-        <ScrollView>
-            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
-                <FormControl>
-                    <FormControl.Label>Busqueda</FormControl.Label>
-                    <Select
-                        selectedValue={key.type}
-                        placeholder={key.type}
-                        mt={1}
-                        onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-                    >
-                        <Select.Item label="Nombre" value="nombre" />
-                        <Select.Item label="Codigo" value="codigo" />
-                    </Select>
-                    <Input 
-                        placeholder={key.type}
-                        onChangeText={(value) => setKey({...key, word:value})}
+        <View>
+            <Box>
+                <HStack space={2}>
+                    <Input onChangeText={handleSearch} value={search}placeholder="Buscar" variant="filled" width="80%" borderRadius="10" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
+                    <IconButton width='15%' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
+                        icon={<Icon  as={MaterialCommunityIcons} name="plus"/>}
+                        onPress={()=>setShowReg(true)}
                     />
-                </FormControl>
-                <Button colorScheme='teal'>Buscar</Button>
+                </HStack>
+                <FlatList data={sanitarios}  renderItem={({item}) => 
+                    <Pressable onPress={() => handleSanitario(item)}>
+                        <HStack borderBottomWidth="1" space='4' >
+                            <Icon size="xl" as={MaterialCommunityIcons} name="virus" width='20%'/>
+                            <VStack width="65%">
+                                <Heading>{item.id}</Heading>
+                                <Text>{item.name}</Text>
+                            </VStack>
+                        </HStack>               
+                    </Pressable>
+                }
+                keyExtractor={item=>item.id}
+                />
+                <Text>{mt}</Text>             
             </Box>
 
-            <Box>
-                <VStack><FormControl isInvalid={'codigo' in errors}>
-                    <FormControl.Label>Codigo</FormControl.Label>
-                    <Input
-                        placeholder='Codigo'
-                        onChangeText={(value) => setData({...data, codigo:value})}
-                    />
-                </FormControl></VStack>
-                <VStack><FormControl isInvalid={'nombre' in errors}>
-                    <FormControl.Label>Nombre</FormControl.Label>
-                    <Input
-                        placeholder='Nombre'
-                        onChangeText={(value) => setData({...data, nombre:value})}
-                    />
-                </FormControl></VStack>
-                <VStack><FormControl isInvalid={'fecha' in errors}>
-                    <FormControl.Label>Fecha de aplicación</FormControl.Label>
-                    <DateTimePicker value={data.fecha} onChange={(evente,currentDate) => setData({...data, fecha:currentDate})} />
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>
-                </FormControl></VStack>
-                <Button colorScheme='info' variant='outline'>Listar hato</Button>
-                <Divider my={1}/>
-                <Center>
-                    <Button.Group>  
-                        <Button colorScheme='success'>Crear</Button>
-                        <Button colorScheme='warning'>Actualizar</Button>
-                        <Button colorScheme='danger'>Borrar</Button>
-                    </Button.Group>
-                </Center> 
+            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})}>
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header>Registrar Control Sanitario</Modal.Header>
+                    <Modal.Body>
+                        <VStack>
+                            <FormControl isInvalid={'name' in errors}>
+                                <FormControl.Label>Nombre</FormControl.Label>
+                                <Input
+                                    placeholder='Nombre'
+                                    onChangeText={(value) => setData({...data, nombre:value})}
+                                />
+                                {
+                                    'name' in errors ? 
+                                        <FormControl.ErrorMessage>{errors.name}</FormControl.ErrorMessage>:
+                                            <FormControl.HelperText></FormControl.HelperText>
+                                }
+                            </FormControl>
+
+                            <FormControl isInvalid={'fecha' in errors}>
+                                <FormControl.Label>Fecha de aplicación</FormControl.Label>
+
+
+                            </FormControl>
+                        </VStack>
+                    </Modal.Body>
+                    <Modal.Footer>
+
+                    </Modal.Footer>
                 
-                
-            </Box>                       
-        </ScrollView>
+                    <Modal.Footer>
+                        <Button.Group space={2}>
+                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
+                                Cancelar
+                            </Button >
+                            <Button size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}} onPress={() => {setShowDel(true);
+                            }}>
+                                Borrar
+                            </Button>
+                        </Button.Group>
+                    </Modal.Footer> 
+                </Modal.Content> 
+            </Modal>
+        </View>
     );
 }
 
-//Screen Control Reproductivo
-var embarazo = {
-    codigo:'',
-    inicio: new Date(),
-    fin: new Date(),
-}
-export const ControlRep = ({navigation}) => {
-    const [key, setKey] = React.useState({type:'codigo',word:''})
-    const [data,setData] = React.useState(embarazo)
-    const [errors, setErrors] = React.useState({})
-    const user = React.useContext(UserContext)
-    return(
-        <ScrollView>
-            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
-                <FormControl>
-                    <FormControl.Label>Busqueda</FormControl.Label>
-                    <Select
-                        selectedValue={key.type}
-                        placeholder="Busqueda"
-                        mt={1}
-                        onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-                    >
-                        <Select.Item label="Codigo" value="codigo" />
-                        <Select.Item label="Fecha" value="fecha" />
-                    </Select>
-                
-                    <Input 
-                        placeholder={key.type}
-                        onChangeText={(value) => setkey({...key, word:value})}
+//Screen Embarazos
+
+export const Embarazos = ({navigation}) => {
+    const [form,setForm] = React.useState({});
+    const [errors, setErrors] = React.useState({});
+    const [show, setShow] = React.useState({embarazo:false,register:false,delete:false,animals:false});
+    const [showPop, setPop] = React.useState({id:false,name:false,inicio:false,fin:false});
+    const [search, setSearch] = React.useState('');
+    const [embarazo, setEmbarazo] = React.useState({id:0,name:'N/A',inicio:new Date(), fin: new Date()});
+
+    const mt = useSelector((state) => state.mtr.embarazos);
+    const embarazos = useSelector((state)=> state.embarazos);
+    const bkp = useSelector((state) => state.bkpEmbarazos);
+
+    const dispatch = useDispatch();
+    
+    const filtrar = (search) => {
+        var resultado = bkp.filter((embarazo)=>{
+            if(embarazo.name.toString().toLowerCase().includes(search.toString().toLowerCase()))
+                return embarazo;
+        });
+        dispatch(action.setEmbarazos(resultado));
+    }
+    const handleSearch = txt => {
+        setSearch(txt);
+        filtrar(txt);
+    }
+    const handleEmbarazo = (item) =>{
+        setShow({...show,embarazo:true});
+    }
+    const handleUpdate =(type) => {
+        console.log(type);
+    }
+    return (
+        <View>
+            <Box>
+                <HStack space={2}>
+                    <Input onChangeText={handleSearch} value={search}placeholder="Buscar" variant="filled" width="80%" borderRadius="10" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
+                    <IconButton width='15%' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
+                        icon={<Icon  as={MaterialCommunityIcons} name="plus"/>}
+                        onPress={()=>setShowReg(true)}
                     />
-                    {'key' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
-                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                    }
-                </FormControl>
-                <Button colorScheme='teal'>Buscar</Button>
+                </HStack>
+                <FlatList data={embarazos}  renderItem={({item}) => 
+                    <Pressable onPress={() => handleEmbarazo(item)}>
+                        <HStack borderBottomWidth="1" space='4' >
+                            <Icon size="xl" as={MaterialCommunityIcons} name="dna" width='20%'/>
+                            <VStack width="65%">
+                                <Heading>{item.id}</Heading>
+                                
+                            </VStack>
+                        </HStack>               
+                    </Pressable>
+                }
+                keyExtractor={item=>item.id}
+                />
+                <Text>{mt}</Text>             
             </Box>
 
-            <VStack><FormControl isInvalid={'codigo' in errors}>
-                <FormControl.Label>Codigo</FormControl.Label>
-                <Input 
-                    value={data.codigo}
-                    onChangeText={(value) => {setData({...data, codigo:value})}}
-        
-                />
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.codigo}</FormControl.ErrorMessage>
-            </FormControl></VStack>
+            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})}>
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header>Registrar Embarazo</Modal.Header>
+                    <Modal.Body>
+                        <VStack>
+                            <FormControl isInvalid={'name' in errors}>
+                                <FormControl.Label>Nombre</FormControl.Label>
+                                <Input
+                                    placeholder='Nombre'
+                                    onChangeText={(value) => setData({...data, nombre:value})}
+                                />
+                                {
+                                    'name' in errors ? 
+                                        <FormControl.ErrorMessage>{errors.name}</FormControl.ErrorMessage>:
+                                            <FormControl.HelperText></FormControl.HelperText>
+                                }
+                            </FormControl>
 
-            <VStack><FormControl isInvalid={'inicio' in errors}>
-                <FormControl.Label>Fecha de inicio</FormControl.Label>
-                <DateTimePicker value={data.inicio} onChange={(event, currentDate) => setData({...data, inicio:currentDate})} />
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.inicio}</FormControl.ErrorMessage>
-            </FormControl></VStack>
+                            <FormControl isInvalid={'fecha' in errors}>
+                                <FormControl.Label>Fecha de inicio</FormControl.Label>
 
-            <VStack><FormControl isInvalid={'fin' in errors}>
-                <FormControl.Label>Fecha de fin</FormControl.Label>
-                <DateTimePicker value={data.fin} onChange={(event, currentDate) => setData({...data, fin:currentDate})} />
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fin}</FormControl.ErrorMessage>
-            </FormControl></VStack>
-            <Center>
-                <Button.Group>
-                    <Button colorScheme='success'>Crear</Button>
-                    <Button colorScheme='warning'>Actualizar</Button>
-                    <Button colorScheme='danger'>Borrar</Button>
-                </Button.Group>
-            </Center>
 
-        </ScrollView>
+                            </FormControl>
+                        </VStack>
+                    </Modal.Body>
+                    <Modal.Footer>
+
+                    </Modal.Footer>
+                
+                    <Modal.Footer>
+                        <Button.Group space={2}>
+                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
+                                Cancelar
+                            </Button >
+                            <Button size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}} onPress={() => {setShowDel(true);
+                            }}>
+                                Borrar
+                            </Button>
+                        </Button.Group>
+                    </Modal.Footer> 
+                </Modal.Content> 
+            </Modal>
+        </View>
     );
 }
 
@@ -865,134 +1113,213 @@ var peso = {
     fecha: new Date(),
     kg:0.0,
 }
-export const Pesaje = ({navigation}) => {
-    const [key, setKey] = React.useState({type:'Peso',word:''})
-    const [data,setData] = React.useState(peso)
-    const [errors, setErrors] = React.useState({})
-    const user = React.useContext(UserContext)
+export const Pesajes = ({navigation}) => {
+    const [form,setForm] = React.useState({});
+    const [errors, setErrors] = React.useState({});
+    const [show, setShow] = React.useState({pesaje:false,register:false,delete:false});
+    const [showPop, setPop] = React.useState({id:false,name:false,date:false});
+    const [search, setSearch] = React.useState('');
+    const [pesaje, setPesaje] = React.useState({id:0,arete:'N/A',kg:0,date:new Date()});
+
+    const mt = useSelector((state) => state.mtr.pesajes);
+    const pesajes = useSelector((state)=> state.pesajes);
+    const bkp = useSelector((state) => state.bkpPesajes);
+
+    const dispatch = useDispatch();
+    
+    const filtrar = (search) => {
+        var resultado = bkp.filter((pesaje)=>{
+            if(pesaje.arete.toString().toLowerCase().includes(search.toString().toLowerCase()))
+                return pesaje;
+        });
+        dispatch(action.setPesajes(resultado));
+    }
+    const handleSearch = txt => {
+        setSearch(txt);
+        filtrar(txt);
+    }
+    const handlePesaje= (item) =>{
+        setShow({...show,pesaje:true});
+    }
+    const handleUpdate =(type) => {
+        console.log(type);
+    }
     return (
-        <KeyboardAvoidingView keyboardVerticalOffset={100} behavior={Platform.OS === "ios" ? "height" : ""}>
-        <ScrollView>
-            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
-                <FormControl>
-                    <FormControl.Label>Busqueda</FormControl.Label>
-                    <Select
-                        selectedValue={key.type}
-                        placeholder={key.type}
-                        onValueChange={(itemValue) => setKey({...key, type:itemValue})}
-                    >
-                        <Select.Item label="Peso" value="peso" />
-                        <Select.Item label="Fecha" value="fecha" />
-                    </Select>
-                    <Input 
-                        placeholder={key.type}
-                        onChangeText={(value) => setkey({...key, word:value})}
+        <View>
+            <Box>
+                <HStack space={2}>
+                    <Input onChangeText={handleSearch} value={search}placeholder="Buscar" variant="filled" width="80%" borderRadius="10" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
+                    <IconButton width='15%' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
+                        icon={<Icon  as={MaterialCommunityIcons} name="plus"/>}
+                        onPress={()=>setShowReg(true)}
                     />
-                    {'key' in errors ?
-                    <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
-                        <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                    }
-                </FormControl>
-                <Button colorScheme='teal'>Buscar</Button>
+                </HStack>
+                <FlatList data={pesajes}  renderItem={({item}) => 
+                    <Pressable onPress={() => handlePredio(item)}>
+                        <HStack borderBottomWidth="1" space='4' >
+                            <Icon size="xl" as={MaterialCommunityIcons} name="weight" width='20%'/>
+                            <VStack width="65%">
+                                <Heading>{item.arete}</Heading>
+                                <Text>{item.kg}</Text>
+                            </VStack>
+                        </HStack>               
+                    </Pressable>
+                }
+                keyExtractor={item=>item.id}
+                />
+                <Text>{mt}</Text>             
             </Box>
 
-            <VStack><FormControl isInvalid={'codigo' in errors}>
-                <FormControl.Label>Codigo</FormControl.Label>
-                <Input value={data.codigo} onChangeText={(value)=>setData({...data, codigo:value})}/>
-            </FormControl></VStack>
-            <VStack><FormControl isInvalid={'arete' in errors}>
-                <FormControl.Label>Arete</FormControl.Label>
-                <Input
-                    placeholder='Arete'
-                    onChangeText={(value) => setData({...data, arete:value})}
-                />
-            </FormControl></VStack>
-            <VStack><FormControl isInvalid={'fecha' in errors}>
-                <FormControl.Label>Fecha</FormControl.Label>
-                <DateTimePicker value={data.fecha} onChange={(event,currentDate) => setData({...data, fecha:currentDate})} />
-                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.fecha}</FormControl.ErrorMessage>
-            </FormControl></VStack>
-            <VStack><FormControl isInvalid={'peso' in errors}>
-                <FormControl.Label>Peso</FormControl.Label>
-                <Input
-                    placeholder='Peso'
-                    keyboardType='numeric'
-                    onChangeText={(value) => setData({...data, peso:value})}
-                />
-            </FormControl></VStack>
-            <Center>
-            <Button.Group>
-                    <Button colorScheme='success'>Crear</Button>
-                    <Button colorScheme='warning'>Actualizar</Button>
-                    <Button colorScheme='danger'>Borrar</Button>
-            </Button.Group>
-            </Center>
+            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})}>
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header>Registrar Pesaje</Modal.Header>
+                    <Modal.Body>
+                        <VStack>
+                            <FormControl isInvalid={'name' in errors}>
+                                <FormControl.Label>Nombre</FormControl.Label>
+                                <Input
+                                    placeholder='Nombre'
+                                    onChangeText={(value) => setData({...data, nombre:value})}
+                                />
+                                {
+                                    'name' in errors ? 
+                                        <FormControl.ErrorMessage>{errors.name}</FormControl.ErrorMessage>:
+                                            <FormControl.HelperText></FormControl.HelperText>
+                                }
+                            </FormControl>
 
-        </ScrollView>
-        </KeyboardAvoidingView>
+                            <FormControl isInvalid={'fecha' in errors}>
+                                <FormControl.Label>Fecha de aplicación</FormControl.Label>
+
+
+                            </FormControl>
+                        </VStack>
+                    </Modal.Body>
+                    <Modal.Footer>
+
+                    </Modal.Footer>
+                
+                    <Modal.Footer>
+                        <Button.Group space={2}>
+                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
+                                Cancelar
+                            </Button >
+                            <Button size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}} onPress={() => {setShowDel(true);
+                            }}>
+                                Borrar
+                            </Button>
+                        </Button.Group>
+                    </Modal.Footer> 
+                </Modal.Content> 
+            </Modal>
+        </View>
     );
 }
 
 //Screen Predios
-var predio = {
-    nombre:'',
-    extension: 0.0,
-    agua: false,
-    pasto: false,
-}
-export const Predio = ( {navitagion}) => {
-    const [key, setKey] = React.useState({type:'nombre',word:''})
-    const [data,setData] = React.useState(predio)
-    const [errors, setErrors] = React.useState({})
-    const user = React.useContext(UserContext)
+
+export const Predios = ( {navitagion}) => {
+    const [form,setForm] = React.useState({});
+    const [errors, setErrors] = React.useState({});
+    const [show, setShow] = React.useState({predio:false,register:false,delete:false,animals:false});
+    const [showPop, setPop] = React.useState({id:false,name:false,date:false});
+    const [search, setSearch] = React.useState('');
+    const [predio, setPredio] = React.useState({id:0,name:'N/A',agua:1,pasto:1});
+
+    const mt = useSelector((state) => state.mtr.predios);
+    const predios = useSelector((state)=> state.predios);
+    const bkp = useSelector((state) => state.bkpPredios);
+
+    const dispatch = useDispatch();
+    
+    const filtrar = (search) => {
+        var resultado = bkp.filter((predio)=>{
+            if(predio.name.toString().toLowerCase().includes(search.toString().toLowerCase()))
+                return predio;
+        });
+        dispatch(action.setPredios(resultado));
+    }
+    const handleSearch = txt => {
+        setSearch(txt);
+        filtrar(txt);
+    }
+    const handlePredio = (item) =>{
+        setShow({...show,predio:true});
+    }
+    const handleUpdate =(type) => {
+        console.log(type);
+    }
     return (
-        <ScrollView>
-            <Box bg="#DEDDDA" rounded="lg" borderColor="#9A9996" borderWidth={2}>
-                <FormControl>
-                    <FormControl.Label>Busqueda</FormControl.Label>
-                        <Input 
-                            placeholder={key.type}
-                            onChangeText={(value) => setkey({...key, word:value})}
-                        />
-                        {'key' in errors ?
-                        <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.key}</FormControl.ErrorMessage>:
-                            <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                        }
-                </FormControl>
-                <Button colorScheme='teal'>Buscar</Button>
+        <View>
+            <Box>
+                <HStack space={2}>
+                    <Input onChangeText={handleSearch} value={search}placeholder="Buscar" variant="filled" width="80%" borderRadius="10" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
+                    <IconButton width='15%' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
+                        icon={<Icon  as={MaterialCommunityIcons} name="plus"/>}
+                        onPress={()=>setShowReg(true)}
+                    />
+                </HStack>
+                <FlatList data={predios}  renderItem={({item}) => 
+                    <Pressable onPress={() => handlePredio(item)}>
+                        <HStack borderBottomWidth="1" space='4' >
+                            <Icon size="xl" as={MaterialCommunityIcons} name="terrain" width='20%'/>
+                            <VStack width="65%">
+                                <Heading>{item.id}</Heading>
+                                <Text>{item.name}</Text>
+                            </VStack>
+                        </HStack>               
+                    </Pressable>
+                }
+                keyExtractor={item=>item.id}
+                />
+                <Text>{mt}</Text>             
             </Box>
 
-            <VStack><FormControl isInvalid={'nombre' in errors}>
-                <FormControl.Label>Nombre</FormControl.Label>
-                <Input
-                    placeholder='Nombre'
-                    onChangeText={(value) => setData({...data, nombre:value})}
-                />
-            </FormControl></VStack>
-            <VStack><FormControl isInvalid={'extension' in errors}>
-                <FormControl.Label>Extension </FormControl.Label>
-                <Input
-                    placeholder='Extension en hectareas'
-                    onChangeText={(value) => setData({...data, extension:value})}
-                    keyboardType='numeric'
-                />
-            </FormControl></VStack>
-            <Divider my={1}/>
-            <Checkbox value={data.agua} size='md' onChange={(value) => setData({...data, agua:value})}>Disponibilidad de agua</Checkbox>
-            <Divider my={1}/>
-            <Checkbox value={data.pasto} size='md' onChange={(value) => setData({...data, pasto:value})}>Disponibilidad de pasto</Checkbox>
-            <Divider my={1}/>
-            <Button colorScheme='info' variant='outline' >Listar hato en el predio</Button>
-            <Divider my={1}/>
-            <Center>
-                <Button.Group>
-                    <Button colorScheme='success'>Crear</Button>
-                    <Button colorScheme='warning'>Actualizar</Button>
-                    <Button colorScheme='danger'>Borrar</Button>
-                </Button.Group>
-            </Center>
+            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})}>
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header>Registrar Predio</Modal.Header>
+                    <Modal.Body>
+                        <VStack>
+                            <FormControl isInvalid={'name' in errors}>
+                                <FormControl.Label>Nombre</FormControl.Label>
+                                <Input
+                                    placeholder='Nombre'
+                                    onChangeText={(value) => setData({...data, nombre:value})}
+                                />
+                                {
+                                    'name' in errors ? 
+                                        <FormControl.ErrorMessage>{errors.name}</FormControl.ErrorMessage>:
+                                            <FormControl.HelperText></FormControl.HelperText>
+                                }
+                            </FormControl>
 
-        </ScrollView>
+                            <FormControl isInvalid={'fecha' in errors}>
+                                <FormControl.Label>Fecha de aplicación</FormControl.Label>
+
+
+                            </FormControl>
+                        </VStack>
+                    </Modal.Body>
+                    <Modal.Footer>
+
+                    </Modal.Footer>
+                
+                    <Modal.Footer>
+                        <Button.Group space={2}>
+                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
+                                Cancelar
+                            </Button >
+                            <Button size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}} onPress={() => {setShowDel(true);
+                            }}>
+                                Borrar
+                            </Button>
+                        </Button.Group>
+                    </Modal.Footer> 
+                </Modal.Content> 
+            </Modal>
+        </View>
     );
 }
 
@@ -1217,23 +1544,17 @@ export const setConfig = ({route, navigation}) => {
             break;
     }
 }
-var perfil = [
-    {type:'user',data:'a'},
-    {type:'name',data:'n'},
-    {type:'pass',data:''},
-    {type:'address',data:'s'},
-    {type:'phone',data:0},
-]
+
 export const Configuracion = ({navigation}) => {
     const tkn = useSelector(state => state.jwt);
-    const params = useSelector(state => state.perfil);
+    const perfil = useSelector(state => state.perfil);
     const dispatch = useDispatch();
         // user,name,pass,cpass,address, phone.
-    React.useEffect(() => {
-        dispatch(action.getPerfil(tkn));
-    })
+
     const [errors, setError] = React.useState({});
-    
+    const handleParam = (type) =>{
+
+    }
     return (
         <Box >
             <Box bgColor='#DEDDDA'>
@@ -1242,16 +1563,18 @@ export const Configuracion = ({navigation}) => {
                 </Center>
             </Box>
             <FlatList
-                data={params}
+                data={perfil}
                 renderItem={({item}) => (
-                    <VStack>
-                        <Button colorScheme='teal' variant='ghost' onPress = {()=>{navigation.navigate('setConfig',{type:item.type, data:item.data})}}>{item.type}</Button>
-                        <Text>{item.data}</Text>
-                        <Divider my={1}/>
-                    </VStack>
-                    
+                    <Pressable onPress={() => handleParam(item)}>
+                        <HStack borderBottomWidth="1" space='4' >
+                            <VStack width="65%">
+                                <Heading>{item.value}</Heading>
+                                <Text>{item.id}</Text>
+                            </VStack>
+                        </HStack>               
+                    </Pressable>
                 )}
-                keyExtractor={(item) => item.type}
+                keyExtractor={(item) => item.id}
             />
         </Box>
     );

@@ -13,19 +13,19 @@
             exit();
         }
         mysqli_set_charset($conexion, 'utf8mb4');
-        $sql = 'CALL gPERFIL(?);';
+        $sql = 'CALL gANIMAL_CONTROL(?);';
         $resultado = mysqli_prepare($conexion,$sql);
         $ok = mysqli_stmt_bind_param($resultado,'s',$id);
         $ok = mysqli_stmt_execute($resultado);
         if ($ok == false){
             echo 'Error al consultar';
         }else{
-            $ok = mysqli_stmt_bind_result($resultado,$username,$name,$address,$mail);
-            
+            $ok = mysqli_stmt_bind_result($resultado,$id,$arete,$ctl);
+            $animal_control = array();
             while(mysqli_stmt_fetch($resultado)){
-                $perfil = array(['id'=>'username','value'=>$username],['id'=>'name','value'=>$name],['id'=>'address','value'=>$address],['id'=>'mail','value'=>$mail]);
+                array_push($animal_control,['id'=>$id,'arete'=>$id,'ctl'=>$ctl,'date'=>$fecha]);
             }
-            echo json_encode($perfil);
+            echo json_encode($animal_control);
         }
         mysqli_stmt_close($resultado);
     }else{
