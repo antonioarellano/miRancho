@@ -23,7 +23,7 @@
             $ok = mysqli_stmt_bind_result($resultado,$id,$embarazo,$arete);
             $crias = array();
             while(mysqli_stmt_fetch($resultado)){
-                array_push($crias,['id'=>$id'embarazo'=>$embarazo,'arete'=>$arete]);
+                array_push($crias,['id'=>$id,'embarazo'=>$embarazo,'arete'=>$arete]);
             }
             echo json_encode($crias);
         }

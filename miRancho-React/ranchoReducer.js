@@ -2,30 +2,30 @@
 function rootReducer(state, action){
     switch (action.type){
         //Usuario
-        case '@set/session':
-            return {...state,jwt:action.payload.session}  
+        case '@set/jwt':
+            return {...state,jwt:action.payload.tkn};
         case '@set/perfil':
-            return {...state,perfil:action.payload.perfil}
+            return {...state,perfil:action.payload.perfil};
         case '@init/perfil':
-            return {...state,perfil:action.payload.perfil, mtr:{...state.mtr,perfil:action.payload.mt}}
+            return {...state,perfil:action.payload.perfil, mtr:{...state.mtr,perfil:action.payload.mt}};
         //Hato   
         case '@set/hato':
-            return {...state,hato:action.payload.hato} 
+            return {...state,hato:action.payload.hato}; 
         case '@set/bkpHato':
-            return {...state,bkpHato:action.payload.hato} 
+            return {...state,bkpHato:action.payload.hato};
         case '@init/hato':
-            return {...state,bkpHato:action.payload.hato,hato:action.payload.hato,mtr:{...state.mtr,hato:action.payload.mt}}
+            return {...state,bkpHato:action.payload.hato,hato:action.payload.hato,mtr:{...state.mtr,hato:action.payload.mt}};
         //Vacunas
         case '@set/vacunas':
-            return {...state,vacunas:action.payload.vacunas}
+            return {...state,vacunas:action.payload.vacunas};
+            break;
         case '@set/bkpVacunas':
-            return {...state,bkpVacunas:action.payload.vacunas} 
+            return {...state,bkpVacunas:action.payload.vacunas};
         case '@init/vacunas':
-            return {...state,bkpVacunas:action.payload.vacunas,vacunas:action.payload.vacunas,mtr:{...state.mtr,vacunas:action.payload.mt}}
-        
+            return {...state,bkpVacunas:action.payload.vacunas,vacunas:action.payload.vacunas,mtr:{...state.mtr,vacunas:action.payload.mt}};
         //Vacuna Animal
-        case '@set/vac_animal':
-            return {...state,vac_animal:action.payload.vac_animal, mtr:{...state.mtr,vac_animal:action.payload.mt}}
+        case '@set/vacunaAnimal':
+            return {...state,vac_animal:action.payload.vacuna_animal, mtr:{...state.mtr,vac_animal:action.payload.mt}};
 
         //Sanitario
         case '@set/sanitarios':
@@ -35,7 +35,7 @@ function rootReducer(state, action){
         case '@init/sanitarios':
             return {...state,bkpSanitarios:action.payload.sanitarios,sanitarios:action.payload.sanitarios,mtr:{...state.mtr,sanitarios:action.payload.mt}}
         //Control Animal
-        case '@set/ctl_animal':
+        case '@set/ctlAnimal':
             return {...state,ctl_animal:action.payload.ctl_animal, mtr:{...state.mtr,ctl_animal:action.payload.mt}}
         
         //Embarazos
@@ -48,7 +48,7 @@ function rootReducer(state, action){
         
             //Crias
         case '@set/crias':
-            return {...state,ctl_animal:action.payload.ctl_animal, mtr:{...state.mtr,ctl_animal:action.payload.mt}}
+            return {...state,crias:action.payload.crias, mtr:{...state.mtr,crias:action.payload.mt}}
 
         //Predios
         case '@set/predios':
@@ -58,7 +58,7 @@ function rootReducer(state, action){
         case '@init/predios':
             return {...state,bkpPredios:action.payload.predios,predios:action.payload.predios,mtr:{...state.mtr,predios:action.payload.mt}}
         //Predio Animal
-        case '@set/pre_animal':
+        case '@set/predioAnimal':
             return {...state,pre_animal:action.payload.pre_animal, mtr:{...state.mtr,pre_animal:action.payload.mt}}
         //Pesajes
         case '@set/pesajes':
@@ -67,6 +67,7 @@ function rootReducer(state, action){
             return {...state,bkpPesajes:action.payload.pesajes} 
         case '@init/pesajes':
             return {...state,bkpPesajes:action.payload.pesajes,pesajes:action.payload.pesajes,mtr:{...state.mtr,pesajes:action.payload.mt}}
+        
             
         case '@create/animal':
             return {...state, animales:[...state.animales,action.payload]}

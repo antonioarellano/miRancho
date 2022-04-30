@@ -21,9 +21,9 @@ const NavMain = createNativeStackNavigator();
 
 const Inicio = ({navigation}) => {
   return(          
-    <NavLogin.Navigator screenOptions={{headerShown: false}} initialRouteName="getData">
+    <NavLogin.Navigator  initialRouteName="login">
       <NavLogin.Screen options={{title: 'Cargando'}} name='getData' component={screens.GetRancho}/>
-      <NavLogin.Screen options={{title: 'Mi Rancho'}} name='login' component={screens.LogIn}/>
+      <NavLogin.Screen options={{title: 'Mi Rancho', headerShown:false}} name='login' component={screens.LogIn}/>
       <NavLogin.Screen options={{title: 'Crear cuenta'}}name='singin' component={screens.SingIn}/>
       <NavLogin.Screen options={{title: 'Terminos y condiciones'}}name='terms' component={screens.Terms}/>
     </NavLogin.Navigator>
@@ -32,14 +32,14 @@ const Inicio = ({navigation}) => {
 
 const Rancho = ({navigation}) => {
   return (
-    <NavRancho.Navigator initialRouteName="Perfil">
+    <NavRancho.Navigator initialRouteName="Ganado">
         <NavRancho.Screen name='Ganado' component={screens.Hato}/>
         <NavRancho.Screen name='Vacunas' component={screens.Vacunas}/>
         <NavRancho.Screen name='Sanitarios' component={screens.Sanitarios}/>
         <NavRancho.Screen name='Embarazos' component={screens.Embarazos}/>
         <NavRancho.Screen name='Pesajes' component={screens.Pesajes}/>
         <NavRancho.Screen name='Predios' component={screens.Predios}/>
-        <NavRancho.Screen name='Embarques' component={screens.newEmbarque}/>
+        <NavRancho.Screen name='Embarques' component={screens.Embarque}/>
         <NavRancho.Screen name='Configuración' component={screens.Configuracion}/>
     </NavRancho.Navigator>
   );

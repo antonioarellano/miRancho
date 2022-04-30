@@ -14,7 +14,7 @@
         }
         mysqli_set_charset($conexion, 'utf8mb4');
         $sql = 'CALL gANIMAL_CONTROL(?);';
-        $resultado = mysqli_prepare($conexion,$sql);
+        $resultado = mysqli_prepare($conexion,$sql); 
         $ok = mysqli_stmt_bind_param($resultado,'s',$id);
         $ok = mysqli_stmt_execute($resultado);
         if ($ok == false){
@@ -23,7 +23,7 @@
             $ok = mysqli_stmt_bind_result($resultado,$id,$arete,$ctl);
             $animal_control = array();
             while(mysqli_stmt_fetch($resultado)){
-                array_push($animal_control,['id'=>$id,'arete'=>$id,'ctl'=>$ctl,'date'=>$fecha]);
+                array_push($animal_control,['id'=>$id,'arete'=>$id,'ctl'=>$ctl]);
             }
             echo json_encode($animal_control);
         }

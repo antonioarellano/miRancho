@@ -1,14 +1,11 @@
 
 const api = 'http://192.168.1.250/request/';
 
-
-
-
 // Usuario
-const setSession = (session) =>{
+export const setSession = (token) =>{
     return {
-        type: '@set/session',
-        payload: {session:session}
+        type: '@set/jwt',
+        payload: {tkn:token}
     }
 }
 export const setPerfil = (perfil) =>{
@@ -36,10 +33,11 @@ export const getSession = (usr, pass) => {
                 }
             );
             const responseTxt = await response.text();
-            if(responseTxt != false)
+            if(responseTxt != false){
                 dispatch(setSession(responseTxt));
-            else
-                dispatch(setSession(false));
+                return true;
+            }else
+                return false;;
         }catch(error){
             console.log(error);
             return false;
@@ -157,25 +155,29 @@ export const getVacunas = (tkn) => {
 
 }
 // Vacunas Animales
-export const setVacunaAnimal = (vac) => {
+export const setVacunaAnimal = (vac_ani,mtr) => {
     return {
         type: '@set/vacunaAnimal',
-        payload: {vacuna_animal:vac}
+        payload: {vacuna_animal:vac_ani,mt:mtr}
     }
 }
 
 export const getVacunaAnimal = (tkn) => {
     return async (dispatch) => {
         try{
-        const response = await fetch(api+'gVacunaAnimal.php',{
-            method: 'GET',
-            headers: {'Authorization':'Bearer '+tkn}
-        });
-        const vacuna_animal = await response.json();
-        if(vacuna_animal!=false)
-            dispatch(setBkpVacunaAnimal(vacuna_animal));
-        else
-            dispatch(setBkpVacunaAnimal(true));
+            let [vac_ani,mt] = await Promise.all([
+                fetch(api+'gVacunaAnimal.php',{
+                    method: 'GET',
+                    headers: {'Authorization':'Bearer '+tkn}
+                }),
+                fetch(api+'gMT.php')
+            ])
+            const vacuna_animal = await vac_ani.json();
+            const mtr = await mt.text();
+            if(vacuna_animal!=false)
+                dispatch(setVacunaAnimal(vacuna_animal,mtr));
+            else
+                dispatch(setVacunaAnimal(true,mtr));
         }catch(error){
             console.log(error);
             return false;
@@ -224,24 +226,28 @@ export const getSanitarios = (tkn) => {
     }
 }
 //Ctl_Animal
-export const setControlAnimal = (ctl) => {
+export const setControlAnimal = (ctl_animal, mtr) => {
     return {
         type: '@set/ctlAnimal',
-        payload: {ctl_animal:ctl}
+        payload: {ctl_animal:ctl_animal, mt:mtr}
     }
 }
 export const getControlAnimal = (tkn) => {
     return async (dispatch) => {
         try{
-        const response = await fetch(api+'gControlAnimal.php',{
-            method: 'GET',
-            headers: {'Authorization':'Bearer '+tkn}
-        });
-        const ctl_animal = await response.json();
-        if(ctl_animal!=false)
-            dispatch(setBkpControlAnimal(ctl_animal));
-        else
-            dispatch(setBkpControlAnimal(true));
+            let [ctl_ani,mt] = await Promise.all([
+                fetch(api+'gControlAnimal.php',{
+                    method: 'GET',
+                    headers: {'Authorization':'Bearer '+tkn}
+                }),
+                fetch(api+'gMT.php')
+            ])
+            const ctl_animal = await ctl_ani.json();
+            const mtr = await mt.text();
+            if(ctl_animal!=false)
+                dispatch(setControlAnimal(ctl_animal,mtr));
+            else
+                dispatch(setControlAnimal(true,mtr));
         }catch(error){
             console.log(error);
             return false;
@@ -292,24 +298,28 @@ export const getEmbarazos = (tkn) => {
     }
 }
 // Crias
-export const setCrias = (cri) => {
+export const setCrias = (cri,mtr) => {
     return {
         type: '@set/crias',
-        payload: {crias:cri}
+        payload: {crias:cri,mt:mtr}
     }
 }
 export const getCrias = (tkn) => {
     return async (dispatch) => {
         try{
-        const response = await fetch(api+'gCrias.php',{
-            method: 'GET',
-            headers: {'Authorization':'Bearer '+tkn}
-        });
-        const crias = await response.json();
-        if(crias!=false)
-            dispatch(setBkpCrias(crias));
-        else
-            dispatch(setBkpCrias(true));
+            let [cri,mt] = await Promise.all([
+                fetch(api+'gCrias.php',{
+                    method: 'GET',
+                    headers: {'Authorization':'Bearer '+tkn}
+                }),
+                fetch(api+'gMT.php')
+            ]);
+            const crias = await cri.json();
+            const mtr = await mt.text();
+            if(crias!=false)
+                dispatch(setCrias(crias));
+            else
+                dispatch(setCrias(true));
         }catch(error){
             console.log(error);
             return false;
@@ -359,24 +369,28 @@ export const getPredios = (tkn) => {
     }
 }
 // Predio Animal
-export const setPredioAnimal = (pre) => {
+export const setPredioAnimal = (prd,mtr) => {
     return {
         type: '@set/predioAnimal',
-        payload: {predio_animal:pre}
+        payload: {pre_animal:prd, mt:mtr}
     }
 }
 export const getPredioAnimal = (tkn) => {
     return async (dispatch) => {
         try{
-        const response = await fetch(api+'gPredioAnimal.php',{
-            method: 'GET',
-            headers: {'Authorization':'Bearer '+tkn}
-        });
-        const prd_animal = await response.json();
-        if(prd_animal!=false)
-            dispatch(setBkpPredioAnimal(prd_animal));
-        else
-            dispatch(setBkpPredioAnimal(true));
+            let [prd,mt] = await Promise.all([
+                fetch(api+'gPredioAnimal.php',{
+                    method: 'GET',
+                    headers: {'Authorization':'Bearer '+tkn}
+                }),
+                fetch(api+'gMT.php')
+            ]);
+            const prd_animal = await prd.json();
+            const mtr = await mt.text();
+            if(prd_animal!=false)
+                dispatch(setPredioAnimal(prd_animal,mtr));
+            else
+                dispatch(setPredioAnimal(true,mtr));
         }catch(error){
             console.log(error);
             return false;
@@ -415,11 +429,31 @@ export const getPesajes = (tkn) => {
             ]);
             const pesajes = await pes.json();
             const mtr = await mt.text();
-            console.log(pesajes);
             if(pesajes!=false)
                 dispatch(initPesajes(pesajes,mtr));
             else
                 dispatch(initPesajes(true,mtr));
+        }catch(error){
+            console.log(error);
+            return false;
+        }
+    }
+}
+
+export const getRancho = (tkn) => {
+    return async (dispatch) =>{
+        try{
+            dispatch(getHato(tkn));
+            dispatch(getPerfil(tkn));
+            dispatch(getEmbarazos(tkn));
+            dispatch(getCrias(tkn));
+            dispatch(getSanitarios(tkn))
+            dispatch(getControlAnimal(tkn));
+            dispatch(getPesajes(tkn));
+            dispatch(getPredios(tkn));
+            dispatch(getPredioAnimal(tkn));
+            dispatch(getVacunas(tkn));
+            dispatch(getVacunaAnimal(tkn));
         }catch(error){
             console.log(error);
             return false;

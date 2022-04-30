@@ -1,6 +1,6 @@
 import { createStore, applyMiddleware } from 'redux';
 import rootReducer from './ranchoReducer';
-import thunk from 'redux-thunk'
+import thunk from 'redux-thunk';
 
 // const persistConfig = {key: 'toor',storage: AsyncStorage,}
 
@@ -28,7 +28,7 @@ var initialState = {
 }
 // const persistedReducer = persistReducer(persistConfig, ranchoReducer); 
 // let persistor = persistStore(ranchoStore);
-export default function store(){
+export default function Store(){
     return createStore(
       rootReducer,
       initialState,
