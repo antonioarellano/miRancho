@@ -8,6 +8,7 @@ import { Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import * as action from './ranchoActions';
 import { Header } from 'react-native/Libraries/NewAppScreen';
+import { ScreenStackHeaderRightView } from 'react-native-screens';
 
 
 // CONSTANTES GLOBALES
@@ -2210,6 +2211,7 @@ export const Embarque = ({navigation}) => {
     const [show, setShow] = React.useState({vehicle:false,solucion:false});
     const [cap, setCap] = React.useState(0);
     const toast = useToast();
+    const [solucion,setSolucion] = React.useState([]);
 
     const embarcar = (arete,peso) =>{
         if(embarque.length < 1)
@@ -2231,7 +2233,7 @@ export const Embarque = ({navigation}) => {
     }
     const addVehicle = (capacidad) =>{
         num = vehicles.length;
-        setVehicles([{id:num,kg:capacidad}].concat(vehicles));
+        setVehicles([{id:num,kg:parseInt(capacidad)}].concat(vehicles));
         setShow({...show,vehicle:false});
     }
     const delVehicle = (id) => {
@@ -2262,6 +2264,30 @@ export const Embarque = ({navigation}) => {
         })
         setHato(tem);
     }
+    const getSolucion = async (h,v) => {
+        try {
+            h_params = '?h='+h.join('&h=')
+            v_params = '&v='+v.join('&v=')
+            const response = await fetch(
+                'http://192.168.1.250:5000/traslado'.concat(h_params,v_params)
+                
+            );
+            const solucion = await response.json();
+            if (solucion != false){
+                setSolucion(solucion);
+                setShow({...show,solucion:true});
+            }else{
+                console.log(solucion);
+                toast.show({title:'Error con solucion',status:'warning',description:'Intente de nuevo'});
+                return false;
+            }
+                
+        } catch (error) {
+            console.log(error);
+            toast.show({title:'Error con el servidor',status:'warning'});
+            return false;
+        }
+    };
     const handleOptimizar = () => {
         if(embarque.length < 1)
             toast.show({title:'Hato vacio',status:'error',description:'Agrega ganado al embarque'});
@@ -2269,7 +2295,15 @@ export const Embarque = ({navigation}) => {
             if(vehicles.length < 1)
                 toast.show({title:'No hay vehiculo',status:'error',description:'Agrega transporte al embarque'});
             else{
-                console.log(embarque);
+                let h = [];
+                let v = [];
+                embarque.forEach(animal =>{
+                    h.push(animal.kg);
+                });
+                vehicles.forEach(vehicle =>{
+                    v.push(vehicle.kg);
+                });
+                getSolucion(h,v);
             }
     }
     React.useEffect(()=>{filterPesajes()},[]);
@@ -2322,6 +2356,32 @@ export const Embarque = ({navigation}) => {
                             keyboardType='numeric'
                             onChangeText={(value) => setCap(value)}
                         />
+                    </Modal.Body>
+        
+                    <Modal.Footer>
+                        <Button.Group space={2}>
+                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
+                                Cancelar
+                            </Button >
+                            <Button size='lg' colorScheme='rgb(0, 247, 255)' 
+                                _text={{color:'white'}} 
+                                onPress={() => {addVehicle(cap)}}s
+                            >
+                                Agregar
+                            </Button>
+                        </Button.Group>
+                    </Modal.Footer> 
+                </Modal.Content> 
+            </Modal>
+            <Modal size='md' isOpen={show.solucion} onClose={()=>setShow({...show,solucion:false})}>
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header>Embarque optimizado</Modal.Header>
+                    <Modal.Body>
+                        <Text>
+                            {solucion.hato}
+                            {solucion.vehiculos}
+                        </Text>
                     </Modal.Body>
         
                     <Modal.Footer>

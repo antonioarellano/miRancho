@@ -46,6 +46,7 @@ class AG:
             self.mutacion(hijos)
             self._individuos = np.copy(hijos)
             self._individuos[np.random.randint(len(self._individuos))] = copy.deepcopy(self._mejor_historico)
+            
             generacion += 1
 
     def mergeSecuencia(self,secuencia):

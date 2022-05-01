@@ -12,14 +12,14 @@ class Traslado:
         viaje = vehiculos[:]
         for animal in hato:
             for truck in viaje:
-                if(animal  < truck):
-                    truck =- animal
-                    fitness =+ animal
+                if(animal  <= truck):
+                    truck -= animal
+                    fitness += animal
                     pass
                 else:
                     if(len(viaje)-1 == viaje.index(truck)):
                         vueltas +=1
-                        fitness =- truck
+                        fitness -= truck
                         viaje = vehiculos[:]
         return int(fitness/vueltas)/10
 
