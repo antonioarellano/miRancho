@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast, Pressable, View, AlertDialog, Spinner, Flex} from 'native-base';
+import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast, Pressable, View, AlertDialog, Spinner, SectionList} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import NetInfo from "@react-native-community/netinfo";
@@ -2274,7 +2274,7 @@ export const Embarque = ({navigation}) => {
             );
             const solucion = await response.json();
             if (solucion != false){
-                setSolucion(solucion);
+                setSolucion([{title:'Vehiculos',data:solucion.vehiculos},{title:'Hato',data:solucion.hato}]);
                 setShow({...show,solucion:true});
             }else{
                 console.log(solucion);
@@ -2378,24 +2378,23 @@ export const Embarque = ({navigation}) => {
                     <Modal.CloseButton/>
                     <Modal.Header>Embarque optimizado</Modal.Header>
                     <Modal.Body>
-                        <Text>
-                            {solucion.hato}
-                            {solucion.vehiculos}
-                        </Text>
+                    <SectionList  sections={solucion} 
+                        keyExtractor={(item, index) => item + index} 
+                        renderItem={({ item }) => <Text>{item}</Text>}
+                        renderSectionHeader={({ section: { title } }) => (
+                            <Heading>{title}</Heading>
+                        )}
+                    
+                    />
                     </Modal.Body>
         
                     <Modal.Footer>
-                        <Button.Group space={2}>
-                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
-                                Cancelar
-                            </Button >
-                            <Button size='lg' colorScheme='rgb(0, 247, 255)' 
-                                _text={{color:'white'}} 
-                                onPress={() => {addVehicle(cap)}}s
-                            >
-                                Agregar
-                            </Button>
-                        </Button.Group>
+                        <Button size='lg' colorScheme='rgb(0, 247, 255)' 
+                            _text={{color:'white'}} 
+                            onPress={() => {setShow({...show,solucion:false})}}
+                        >
+                            Aceptar
+                        </Button>
                     </Modal.Footer> 
                 </Modal.Content> 
             </Modal>
