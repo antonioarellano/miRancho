@@ -1,14 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button, NativeBaseProvider, Box, Input, FormControl, VStack, Checkbox, Link, Slider, Select, Radio, ScrollView, Divider, Center, Text, FlatList,Heading, Icon, KeyboardAvoidingView,Alert, IconButton, CloseIcon, Collapse, HStack, Modal,useToast, Pressable, View, AlertDialog, Spinner, SectionList} from 'native-base';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import NetInfo from "@react-native-community/netinfo";
-import { Platform } from 'react-native';
+import { Platform, SafeAreaViewBase } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
 import * as action from './ranchoActions';
-import { Header } from 'react-native/Libraries/NewAppScreen';
-import { ScreenStackHeaderRightView } from 'react-native-screens';
 
 
 // CONSTANTES GLOBALES
@@ -29,9 +27,9 @@ export const LogIn = ({navigation}) => {
     const [errors, setError] = React.useState({});
 
     React.useEffect(() => {
-        dispatch(action.setSession('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTI0ODY5NzgsInVzZXIiOiJwcnVlYmEifQ.D9z3QEagJ-ACpalDB68npB9h-pxVGntJbHFRP7wqXNc'))
-        //if(session != false)
-        navigation.navigate('getData');  
+        // dispatch(action.setSession('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTI0ODY5NzgsInVzZXIiOiJwcnVlYmEifQ.D9z3QEagJ-ACpalDB68npB9h-pxVGntJbHFRP7wqXNc'))
+        if(session != false)
+            navigation.navigate('getData');  
     },[]);
     const HandleLogin = () => {
         if(cntLogin > 10)
@@ -341,22 +339,31 @@ export const Terms = ({navigation}) => {
 //Screen getData-Rancho
 export const GetRancho = ({navigation}) => {
     const tkn = useSelector(state => state.jwt);
+    const mtr = useSelector(state => state.mtr);
+    const trans = useSelector(state => state.trans);
     const [show, setShow] = React.useState(false);
     const dispatch = useDispatch();
     const errors = useSelector((state) =>state.errors);
     const toast = useToast();
     
     const getData = () => {
-        console.log(tkn);
         NetInfo.fetch().then((state) => { 
-            if(state.isConnected)
-                dispatch(action.getRancho(tkn)).then(msj => {
+            if(state.isConnected){
+                if(trans.length > 0){
+                    var reject = action.processTrans(tkn,trans,mtr);
+                    if(reject > 0)
+                        toast.show({title:'Error en transacciones',status:'error',description:reject});
+                    else
+                        toast.show({title:'Sincronización exitosa',status:'info'});
+                    dispatch(action.flushTrans());
+                }
+                dispatch(action.getRancho(tkn,mtr)).then(msj => {
                     if(msj === false){
                         toast.show({title:'Error con el servidor',status:'warning' ,description:'Intente de nuevo'});
                     }else
                         navigation.navigate('rancho');
                 });
-            else
+            }else
                 setShow(true);
         });
     }
@@ -391,11 +398,10 @@ export const GetRancho = ({navigation}) => {
 //Screen Ganado
 
 export const Hato = ({navigation}) => {
-    // const jwt = useSelector(state => state.jwt);
-
     const hato = useSelector((state)=> state.hato);
     const bkp = useSelector((state) => state.bkpHato);
     const mt = useSelector((state) => state.mtr.hato);
+    const tkn = useSelector(state => state.jwt);
     
     const vacunas = useSelector(state=> state.vacunas);
     const vac_animal = useSelector( state => state.vac_animal);
@@ -417,10 +423,10 @@ export const Hato = ({navigation}) => {
     const [list,setList] = React.useState([]);
     const [show, setShow] = React.useState({animal:false,register:false,delete:false,vac:false,pesaje:false,rep:false,san:false,trans:false,predios:false})   
     const [showPop, setPop] = React.useState({name:false,nac:false,date:false,sex:false,race:false,color:false,predio:false});
-    
+    const [picker, setPicker] = React.useState(false);
     const [search, setSearch] = React.useState('');
     const [animal, setAnimal] = React.useState({arete:'',name:'',nac:new Date(),sex:'M',race:'',color:''});
-    const [form, setForm] = React.useState({show:false,nac:'YYYY-MM-DD'});
+    const [form, setForm] = React.useState({show:false,nac:'YYYY/MM/DD'});
     const [errors, setError] = React.useState({});
 
 
@@ -446,27 +452,6 @@ export const Hato = ({navigation}) => {
     const handleAnimal = (item) =>{
         setAnimal(item);
         setShow({...show,animal:true});
-    }
-    const handleUpdate =(type) => {
-        switch(type){
-            case 'name':
-                console.log(form.name);
-                break;
-            case 'nac':
-                console.log(form.nac.toString());
-                break;
-            case 'sex':
-                console.log(form.sex);
-                break;
-            case 'race':
-                console.log(form.race);
-                break;
-            case 'color':
-                console.log(form.color);
-                break;
-            default:
-                break;
-        }
     }
     const handleVacunas = () => {
         var ids = vac_animal.filter((rel)=>{
@@ -505,7 +490,6 @@ export const Hato = ({navigation}) => {
         }else
             toast.show({title:'Vacio',description:'No hay controles',status:'info',placement:'top'});
     }
-    
     const handleReproductivos = () => {
         var cria = crias.filter((embarazo)=>{
             if (embarazo.arete == animal.arete)
@@ -513,7 +497,7 @@ export const Hato = ({navigation}) => {
         });
         console.log(embarazos);
         var lista = embarazos.filter((embarazo)=> {
-            for(i=0; i<cria.length; i++)
+            for(var i=0; i<cria.length; i++)
                 if(embarazo.id == cria[i].embarazo)
                 return true;
         });
@@ -554,6 +538,84 @@ export const Hato = ({navigation}) => {
             setShow({...show,predios:true});
         }else
             toast.show({title:'Vacio',description:'No hay predios',status:'info',placement:'top'});
+    }
+    const handleRegister = async() =>{ 
+        const animal = {
+            arete:form.arete,
+            name:form.name,
+            sex:form.sex,
+            nac:form.nac,
+            race:form.race,
+            color:form.color
+        }
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                action.createAnimal(tkn,animal).then(ins =>{
+                    setShow({...show,register:false});
+                    if(ins == true){
+                        toast.show({title:'Exito',status:'success',description:'Animal creado'});
+                        dispatch(action.getHato(tkn));
+                    }else
+                        toast.show({title:'Error al insertar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'addAnimal',data:animal}));
+                dispatch(action.addAnimal(animal));
+            }
+        });
+    }
+    const handleDelete = async(arete) =>{ 
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                action.deleteAnimal(tkn,arete).then(del =>{
+                    setShow({...show,delete:false});
+                    if(del == true){
+                        toast.show({title:'Exito',status:'info',description:'Animal eliminado'});
+                        dispatch(action.getHato(tkn));
+                        setShow({...show,delete:false,animal:false});
+                        setAnimal({});
+                    }else
+                        toast.show({title:'Error al eliminar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'delAnimal',data:arete}));
+                dispatch(action.dropAnimal(arete));
+            }
+        });
+    }
+    const handleUpdate =async(type,date=null) => {
+        var word = '';
+        switch(type){
+            case 'name':
+                word =form.name ;
+                setAnimal({...animal,name:word});
+                break;
+            case 'nac':
+                word = date;
+                console.log('es',word);
+                break;
+            case 'sex':
+                word = form.sex;
+                break;
+            case 'race':
+                word = form.race;
+                break;
+            case 'color':
+                word = form.color;
+                break;
+            default:
+                break;
+        }
+        var upd = await action.updateAnimal(tkn,animal.arete,type,word);
+        if(upd == true){
+            dispatch(action.getHato(tkn));
+            setShow({...show,animal:false});
+            toast.show({title:'Actualizacion exitosa',status:'success'});
+            
+        }else{
+            setShow({...show,animal:false});
+            toast.show({title:'Error con el servidor',status:'error',description:'Intente de nuevo'});
+        }
     }
     return(
         <View>
@@ -615,21 +677,22 @@ export const Hato = ({navigation}) => {
                                 </Modal.Content>
                             </Modal>
 
-                            <Pressable  onPress={() => setPop({...showPop,nac:true})}>
+                            <Pressable  onPress={() => {setPicker(true);}}>
                                 <Text fontSize='2xs'>Nacimiento</Text>
                                 <Text fontSize='md'>{animal.nac}</Text>
                                 <Divider />
                             </Pressable>        
-                            {showPop.nac && (
+                            {picker && (
                                 <DateTimePicker
                                     value={new Date(animal.nac)}
                                     mode='date'
                                     display="default"
                                     onChange={(event, selectedDate) => {
                                         const f = selectedDate;
-                                        const currentDate = f.getFullYear() + "-"+ f.getMonth()+ "-" +f.getDate();
-                                        setForm({...form,nac:currentDate});
-                                        setPop({...showPop,nac:false});
+                                        var date = f.getFullYear()+'-'+(f.getMonth()+1)+'-'+f.getDate();
+                                        setPicker(false);
+                                        handleUpdate('nac',date);
+                                        
                                     }}
                                 />
                             )}
@@ -647,9 +710,7 @@ export const Hato = ({navigation}) => {
                                             <Select
                                                 selectedValue={form.sex}
                                                 onValueChange={(itemValue) => {
-                                                    setForm({...form, sex:itemValue});
-                                                    handleUpdate('sex');
-                                                    (setPop({...showPop,sex:false}));
+                                                    setForm({...form, sex:itemValue})
                                                 }}
                                                 
                                             >
@@ -663,7 +724,10 @@ export const Hato = ({navigation}) => {
                                             <Button colorScheme="coolGray" variant="ghost" onPress={()=>setPop({...showPop,sex:false})}> 
                                                 Cancel
                                             </Button>
-                                            <Button colorScheme="warning" onPress={()=>handleUpdate('sex')}>Actualizar</Button>
+                                            <Button colorScheme="warning" onPress={()=>{
+                                                handleUpdate('sex');
+                                                setPop({...showPop,sex:false});
+                                            }}>Actualizar</Button>
                                         </Button.Group>
                                     </Modal.Footer>
                                 </Modal.Content>
@@ -679,7 +743,7 @@ export const Hato = ({navigation}) => {
                                     <Modal.Header alignContent='center'>Actualizar raza</Modal.Header>
                                     <Modal.Body>
                                         <FormControl>
-                                            <Input placeholder='Nueva raza' onChangeText={(value)=>setForm({...form,race:value})}/>
+                                            <Input placeholder='Nueva raza' onChangeText={(value)=>{setForm({...form,race:value});}}/>
                                         </FormControl>
                                     </Modal.Body>
                                     <Modal.Footer justifyContent="flex-end">
@@ -712,7 +776,6 @@ export const Hato = ({navigation}) => {
                                     <Modal.Footer justifyContent="flex-end">
                                         <Button.Group space={2}>
                                             <Button colorScheme="coolGray" variant="ghost" onPress={()=> {
-                                                handleUpdate('color');
                                                 setPop({...showPop,color:false});
                                             }}> 
                                                 Cancel
@@ -806,7 +869,7 @@ export const Hato = ({navigation}) => {
                                 <Button variant="unstyled" colorScheme="coolGray" onPress={()=>setShow({...show,delete:false})}>
                                     Cancelar
                                 </Button>
-                                <Button  size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
+                                <Button onPress={()=> handleDelete(animal.arete)} size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
                                     Confirmar 
                                 </Button>
                                 </Button.Group>
@@ -921,17 +984,6 @@ export const Hato = ({navigation}) => {
                                     <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
                                 }
                             </FormControl>
-                            <FormControl isInvalid={'predio' in errors}>
-                                <FormControl.Label>Predio</FormControl.Label>
-                                <Input
-                                    placeholder='Predio'
-                                    onChangeText = {(value) => setForm({...form, predio:value})}
-                                />
-                                {'predio' in errors ?
-                                <FormControl.ErrorMessage _text={{fontSize: 'xs', color: 'error.500', fontWeight: 500}}>{errors.predio}</FormControl.ErrorMessage>:
-                                    <FormControl.HelperText _text={{fontSize: 'xs'}}>Diferenciar MAYUS de MINUS</FormControl.HelperText>
-                                }
-                            </FormControl>
                         </VStack>
                     </Modal.Body>
                     <Modal.Footer>
@@ -939,7 +991,7 @@ export const Hato = ({navigation}) => {
                             <Button colorScheme="coolGray" variant="ghost" onPress={()=>setShow({...show,register:false})}> 
                                 Cancel
                             </Button>
-                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}}onPress={()=>handleUpdate('name')}>Crear</Button>
+                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}}onPress={()=>handleRegister()}>Crear</Button>
                         </Button.Group>
                     </Modal.Footer>
                 </Modal.Content>
@@ -1064,6 +1116,7 @@ export const Vacunas = ({navigation }) => {
     const [vacuna, setVacuna] = React.useState({id:0,name:'N/A',date:new Date()});
     const [list, setList] = React.useState([]);
 
+    const tkn = useSelector(state => state.jwt);
     const mt = useSelector((state) => state.mtr.vacunas);
     const vacunas = useSelector((state)=> state.vacunas);
     const bkp = useSelector((state) => state.bkpVacunas);
@@ -1088,9 +1141,6 @@ export const Vacunas = ({navigation }) => {
         setVacuna(item);
         setShow({...show,vacuna:true});
     }
-    const handleUpdate =(type) => {
-        console.log(type);
-    }
     const handleAnimals = () => {
         var ids = vac_animal.filter((rel)=>{
             if(rel.vacuna == vacuna.id)
@@ -1107,6 +1157,76 @@ export const Vacunas = ({navigation }) => {
             setShow({...show,animals:true});
         }else
             toast.show({title:'Vacio',description:'No hay animales'});
+    }
+    const handleRegister = async() =>{ 
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                
+                action.createVacuna(tkn,{
+                    name:form.name,
+                    fecha:form.date
+                }).then(ins =>{
+                    setShow({...show,register:false});
+                    if(ins == true){
+                        toast.show({title:'Exito',status:'success',description:'Animal creado'});
+                        dispatch(action.getVacunas(tkn));
+                    }else
+                        toast.show({title:'Error al insertar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'addVacuna',data:{
+                    name:form.name,
+                    fecha:form.date
+                }}));
+                dispatch(action.addVacuna({
+                    name:form.name,
+                    fecha:form.date
+                }));
+            }
+        });
+    }
+    const handleDelete = async(id) =>{ 
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                action.deleteVacuna(tkn,id).then(del =>{
+                    setShow({...show,delete:false});
+                    if(del == true){
+                        dispatch(action.getVacunas(tkn));
+                        setShow({...show,delete:false,animal:false});
+                        toast.show({title:'Exito',status:'info',description:'Vacuna eliminada'});
+                        setAnimal({});
+                    }else
+                        toast.show({title:'Error al eliminar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'delVacuna',data:id}));
+                dispatch(action.dropVacuna(id));
+            }
+        });
+    }
+    const handleUpdate =async(type,date=null) => {
+        var word = '';
+        switch(type){
+            case 'name':
+                word =form.name ;
+                setVacuna({...vacuna,name:word});
+                break;
+            case 'fecha':
+                word = date;
+                break;
+            default:
+                break;
+        }
+        var upd = await action.updateVacuna(tkn,vacuna.id,type,word);
+        if(upd == true){
+            dispatch(action.getVacunas(tkn));
+            setShow({...show,vacuna:false});
+            toast.show({title:'Actualizacion exitosa',status:'success'});
+            
+        }else{
+            setShow({...show,vacuna:false});
+            toast.show({title:'Error con el servidor',status:'error',description:'Intente de nuevo'});
+        }
     }
     return (
         <View>
@@ -1167,7 +1287,7 @@ export const Vacunas = ({navigation }) => {
                                         display="default"
                                         onChange={(event, selectedDate) => {
                                             const f = selectedDate;
-                                            const currentDate = f.getFullYear() + "-"+ f.getMonth()+ "-" +f.getDate();
+                                            const currentDate = f.getFullYear() + "-"+ (f.getMonth()+1)+ "-" +f.getDate();
                                             setForm({...form,date:currentDate,show:false});
                                     
                                         }}
@@ -1176,17 +1296,15 @@ export const Vacunas = ({navigation }) => {
                             </FormControl>
                         </VStack>
                     </Modal.Body>
-                    <Modal.Footer>
-
-                    </Modal.Footer>
-                
+                    
                     <Modal.Footer>
                         <Button.Group space={2}>
-                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
+                            <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow({...show,register:false})}}>
                                 Cancelar
                             </Button >
-                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}} onPress={() => {setShowDel(true);
-                            }}>
+                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}} 
+                                onPress={() => {handleRegister();}
+                            }>
                                 Registrar vacuna
                             </Button>
                         </Button.Group>
@@ -1239,9 +1357,9 @@ export const Vacunas = ({navigation }) => {
                                     display="default"
                                     onChange={(event, selectedDate) => {
                                         const f = selectedDate;
-                                        const currentDate = f.getFullYear() + "-"+ f.getMonth()+ "-" +f.getDate();
+                                        const currentDate = f.getFullYear() + "-"+ (f.getMonth()+1)+ "-" +f.getDate();
                                         setForm({...form,date:currentDate});
-                                        handleUpdate('nac');
+                                        handleUpdate('fecha',currentDate);
                                         setPop({...showPop,date:false});
                                     }}
                                 />
@@ -1287,7 +1405,7 @@ export const Vacunas = ({navigation }) => {
                                 <Button variant="unstyled" colorScheme="coolGray" onPress={()=>setShow({...show,delete:false})}>
                                     Cancelar
                                 </Button>
-                                <Button  size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
+                                <Button onPress={()=>{handleDelete(vacuna.id)}} size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
                                     Confirmar 
                                 </Button>
                                 </Button.Group>
@@ -1342,6 +1460,7 @@ export const Sanitarios= ({navigation}) =>{
     const bkp = useSelector((state) => state.bkpSanitarios);
     const hato = useSelector(state => state.hato);
     const ctl_animal = useSelector(state => state.ctl_animal);
+    const tkn = useSelector(state => state.jwt);
 
     const toast = useToast();
     const dispatch = useDispatch();
@@ -1361,9 +1480,6 @@ export const Sanitarios= ({navigation}) =>{
         setSanitario(item);
         setShow({...show,sanitario:true});
     }
-    const handleUpdate =(type) => {
-        console.log(type);
-    }
     const handleAnimals = () => {
         var ids = ctl_animal.filter((rel)=>{
             if(rel.ctl == sanitario.id)
@@ -1381,6 +1497,67 @@ export const Sanitarios= ({navigation}) =>{
             setShow({...show,animals:true});
         }else
             toast.show({title:'Vacio',description:'No hay animales'});
+    }
+    const handleRegister = async() =>{
+        const nuevo = {name:form.name,fecha:form.date};
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                action.createSanitario(tkn,nuevo).then(ins =>{
+                    setShow({...show,register:false});
+                    if(ins == true){
+                        toast.show({title:'Exito',status:'success',description:'Registro creado'});
+                        dispatch(action.getSanitarios(tkn));
+                    }else
+                        toast.show({title:'Error al insertar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'addSanitario',data:nuevo}));
+                dispatch(action.addSanitario(nuevo));
+            }
+        });
+    }
+    const handleDelete = async(id) =>{ 
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                action.deleteSanitario(tkn,id).then(del =>{
+                    setShow({...show,delete:false});
+                    if(del == true){
+                        dispatch(action.getSanitarios(tkn));
+                        setShow({...show,delete:false,sanitario:false});
+                        toast.show({title:'Exito',status:'info',description:'Sanitario eliminada'});
+                        setAnimal({});
+                    }else
+                        toast.show({title:'Error al eliminar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'delSanitario',data:id}));
+                dispatch(action.dropSanitario(id));
+            }
+        });
+    }
+    const handleUpdate =async(type,date=null) => {
+        var word = '';
+        switch(type){
+            case 'name':
+                word =form.name;
+                setSanitario({...sanitario,name:word});
+                break;
+            case 'fecha':
+                word = date;
+                break;
+            default:
+                break;
+        }
+        var upd = await action.updateSanitario(tkn,sanitario.id,type,word);
+        if(upd == true){
+            dispatch(action.getSanitarios(tkn));
+            setShow({...show,sanitario:false});
+            toast.show({title:'Actualizacion exitosa',status:'success'});
+            
+        }else{
+            setShow({...show,sanitario:false});
+            toast.show({title:'Error con el servidor',status:'error',description:'Intente de nuevo'});
+        }
     }
     return (
         <View>
@@ -1441,9 +1618,8 @@ export const Sanitarios= ({navigation}) =>{
                                         display="default"
                                         onChange={(event, selectedDate) => {
                                             const f = selectedDate;
-                                            const currentDate = f.getFullYear() + "-"+ f.getMonth()+ "-" +f.getDate();
+                                            const currentDate = f.getFullYear() + "-"+ (f.getMonth()+1)+ "-" +f.getDate();
                                             setForm({...form,show:false,date:currentDate});
-                                           
                                         }}
                                     />
                                 )}
@@ -1456,8 +1632,9 @@ export const Sanitarios= ({navigation}) =>{
                             <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
                                 Cancelar
                             </Button >
-                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}} onPress={() => {setShowDel(true);
-                            }}>
+                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}} 
+                                onPress={() => {handleRegister()}
+                            }>
                                 Crear
                             </Button>
                         </Button.Group>
@@ -1481,7 +1658,9 @@ export const Sanitarios= ({navigation}) =>{
                                     <Modal.Header alignContent='center'>Actualizar nombre</Modal.Header>
                                     <Modal.Body>
                                         <FormControl>
-                                            <Input placeholder='Nuevo nombre' onChangeText={(value)=>{setForm({...form,name:value})}}/>
+                                            <Input placeholder='Nuevo nombre' 
+                                                onChangeText={(value)=>{setForm({...form,name:value})}}
+                                            />
                                         </FormControl>
                                     </Modal.Body>
                                     <Modal.Footer >
@@ -1510,9 +1689,9 @@ export const Sanitarios= ({navigation}) =>{
                                     display="default"
                                     onChange={(event, selectedDate) => {
                                         const f = selectedDate;
-                                        const currentDate = f.getFullYear() + "-"+ f.getMonth()+ "-" +f.getDate();
+                                        const currentDate = f.getFullYear() + "-"+ (f.getMonth()+1)+ "-" +f.getDate();
                                         setForm({...form,date:currentDate});
-                                        handleUpdate('nac');
+                                        handleUpdate('fecha',currentDate);
                                         setPop({...showPop,date:false});
                                     }}
                                 />
@@ -1558,7 +1737,7 @@ export const Sanitarios= ({navigation}) =>{
                                 <Button variant="unstyled" colorScheme="coolGray" onPress={()=>setShow({...show,delete:false})}>
                                     Cancelar
                                 </Button>
-                                <Button  size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
+                                <Button onPress={()=>{handleDelete(sanitario.id)}} size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
                                     Confirmar 
                                 </Button>
                                 </Button.Group>
@@ -1732,9 +1911,9 @@ export const Pesajes = ({navigation}) => {
     const mt = useSelector((state) => state.mtr.pesajes);
     const pesajes = useSelector((state)=> state.pesajes);
     const bkp = useSelector((state) => state.bkpPesajes);
-
+    const tkn = useSelector(state => state.jwt);
     const dispatch = useDispatch();
-    
+    const toast = useToast();
     const filtrar = (search) => {
         var resultado = bkp.filter((pesaje)=>{
             if(pesaje.arete.toString().toLowerCase().includes(search.toString().toLowerCase()))
@@ -1750,9 +1929,44 @@ export const Pesajes = ({navigation}) => {
         setPesaje(item);
         setShow({...show,pesaje:true});
     }
-    const handleUpdate =(type) => {
-        console.log(type);
+    const handleRegister = async() =>{
+        const nuevo = {arete:form.arete, kg:form.kg,fecha:form.date};
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                action.createPesaje(tkn,nuevo).then(ins =>{
+                    setShow({...show,register:false});
+                    if(ins == true){
+                        toast.show({title:'Exito',status:'success',description:'Pesaje creado'});
+                        dispatch(action.getPesajes(tkn));
+                    }else
+                        toast.show({title:'Error al insertar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'addPesaje',data:nuevo}));
+                dispatch(action.addPesaje(nuevo));
+            }
+        });
     }
+    const handleDelete = async(id) =>{ 
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                action.deletePesaje(tkn,id).then(del =>{
+                    setShow({...show,delete:false});
+                    if(del == true){
+                        dispatch(action.getPesajes(tkn));
+                        setShow({...show,delete:false,pesaje:false});
+                        toast.show({title:'Exito',status:'info',description:'Pesaje eliminada'});
+                        
+                    }else
+                        toast.show({title:'Error al eliminar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'delPesaje',data:id}));
+                dispatch(action.dropPesaje(id));
+            }
+        });
+    }
+   
     return (
         <View>
             <Box>
@@ -1840,8 +2054,8 @@ export const Pesajes = ({navigation}) => {
                             <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
                                 Cancelar
                             </Button >
-                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}} onPress={() => {setShowDel(true);
-                            }}>
+                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}} 
+                                onPress={() => {handleRegister();}}>
                                 Crear
                             </Button>
                         </Button.Group>
@@ -1855,52 +2069,12 @@ export const Pesajes = ({navigation}) => {
                     <Modal.Header alignSelf="center" _text={{fontSize:'xl',Overridden:'bold'}}>{pesaje.arete}</Modal.Header>
                     <Modal.Body >
                         <VStack >
-                            <Pressable onPress={() => setPop({...showPop,kg:true})}>
-                                <Text fontSize='2xs'>Peso</Text>
-                                <Text fontSize='md'>{pesaje.kg}</Text>
-                                <Divider />
-                            </Pressable> 
-                            <Modal isOpen={showPop.kg} onClose={() => setPop({...showPop,kg:false})} size='xl'>
-                                <Modal.Content >
-                                    <Modal.Header alignContent='center'>Actualizar peso</Modal.Header>
-                                    <Modal.Body>
-                                        <FormControl>
-                                            <Input placeholder='Nuevo peso' keyboardType='numeric' onChangeText={(value)=>{setForm({...form,kg:value})}}/>
-                                        </FormControl>
-                                    </Modal.Body>
-                                    <Modal.Footer >
-                                        <Button.Group space={2}>
-                                            <Button colorScheme="coolGray" variant="ghost" onPress={()=>setPop({...showPop,kg:false})}> 
-                                                Cancel
-                                            </Button>
-                                            <Button colorScheme="warning" onPress={()=> {
-                                                handleUpdate('name');
-                                                setPop({...showPop,kg:false});
-                                            }}>Actualizar</Button>
-                                        </Button.Group>
-                                    </Modal.Footer>
-                                </Modal.Content>
-                            </Modal>
-
-                            <Pressable  onPress={() => setPop({...showPop,date:true})}>
-                                <Text fontSize='2xs'>Fecha de aplicacion</Text>
-                                <Text fontSize='md'>{pesaje.date}</Text>
-                                <Divider />
-                            </Pressable>        
-                            {showPop.date && (
-                                <DateTimePicker
-                                    value={new Date(pesaje.date)}
-                                    mode='date'
-                                    display="default"
-                                    onChange={(event, selectedDate) => {
-                                        const f = selectedDate;
-                                        const currentDate = f.getFullYear() + "-"+ f.getMonth()+ "-" +f.getDate();
-                                        setForm({...form,date:currentDate});
-                                        handleUpdate('nac');
-                                        setPop({...showPop,date:false});
-                                    }}
-                                />
-                            )}
+                            <Text fontSize='2xs'>Peso</Text>
+                            <Text fontSize='md'>{pesaje.kg}</Text>
+                            <Divider />
+                            <Text fontSize='2xs'>Fecha de registro</Text>
+                            <Text fontSize='md'>{pesaje.date}</Text>
+                            <Divider />
                         </VStack>         
                     </Modal.Body>
                     <Modal.Footer>
@@ -1930,7 +2104,7 @@ export const Pesajes = ({navigation}) => {
                                 <Button variant="unstyled" colorScheme="coolGray" onPress={()=>setShow({...show,delete:false})}>
                                     Cancelar
                                 </Button>
-                                <Button  size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
+                                <Button onPress={()=>{handleDelete(pesaje.id)}}  size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
                                     Confirmar 
                                 </Button>
                                 </Button.Group>
@@ -1958,6 +2132,7 @@ export const Predios = ( {navitagion}) => {
     const bkp = useSelector((state) => state.bkpPredios);
     const pre_animal = useSelector((state) => state.pre_animal);
     const hato = useSelector(state => state.hato);
+    const tkn = useSelector(state => state.jwt);
 
     const dispatch = useDispatch();
     const toast = useToast();
@@ -1976,9 +2151,6 @@ export const Predios = ( {navitagion}) => {
     const handlePredio = (item) =>{
         setPredio(item);
         setShow({...show,predio:true});
-    }
-    const handleUpdate =(type) => {
-        console.log(type);
     }
     const handleAnimals = () => {
         
@@ -2012,6 +2184,70 @@ export const Predios = ( {navitagion}) => {
         }else
             toast.show({title:'Vacio',description:'No hay animales'});
     } 
+    const handleRegister = async() =>{
+        const nuevo = {name:form.name,agua:form.agua,pasto:form.pasto};
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                action.createPredio(tkn,nuevo).then(ins =>{
+                    setShow({...show,register:false});
+                    if(ins == true){
+                        toast.show({title:'Exito',status:'success',description:'Predio creado'});
+                        dispatch(action.getPredios(tkn));
+                    }else
+                        toast.show({title:'Error al insertar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'addPredio',data:nuevo}));
+                dispatch(action.addPredio(nuevo));
+            }
+        });
+    }
+    const handleDelete = async(id) =>{ 
+        NetInfo.fetch().then(state => {
+            if(state.isConnected){
+                action.deletePredio(tkn,id).then(del =>{
+                    setShow({...show,delete:false});
+                    if(del == true){
+                        dispatch(action.getPredios(tkn));
+                        setShow({...show,delete:false,predio:false});
+                        toast.show({title:'Exito',status:'info',description:'Predio eliminada'});
+                        setAnimal({});
+                    }else
+                        toast.show({title:'Error al eliminar',status:'error',description:'Intente de nuevo'});
+                });
+            }else{
+                dispatch(action.addTrans({type:'delPredio',data:id}));
+                dispatch(action.dropPredio(id));
+            }
+        });
+    }
+    const handleUpdate =async(type,date=null) => {
+        var word = '';
+        switch(type){
+            case 'name':
+                word =form.name;
+                setPredio({...predio,name:word});
+                break;
+            case 'agua':
+                word = form.agua;
+                break;
+            case 'pasto':
+                word = form.pasto;
+                break;
+            default:
+                break;
+        }
+        var upd = await action.updatePredio(tkn,predio.id,type,word);
+        if(upd == true){
+            dispatch(action.getPredios(tkn));
+            setShow({...show,predio:false});
+            toast.show({title:'Actualizacion exitosa',status:'success'});
+            
+        }else{
+            setShow({...show,predio:false});
+            toast.show({title:'Error con el servidor',status:'error',description:'Intente de nuevo'});
+        }
+    }
     return (
         <View>
             <Box>
@@ -2065,8 +2301,9 @@ export const Predios = ( {navitagion}) => {
                             <Button variant="ghost" colorScheme="blueGray" size = 'md' onPress={() => {setShow(false)}}>
                                 Cancelar
                             </Button >
-                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}} onPress={() => {setShowDel(true);
-                            }}>
+                            <Button size='lg' colorScheme='rgb(0, 247, 255)' _text={{color:'white'}} 
+                                onPress={() => {handleRegister();}
+                            }>
                                 Crear
                             </Button>
                         </Button.Group>
@@ -2149,7 +2386,7 @@ export const Predios = ( {navitagion}) => {
                                 <Button variant="unstyled" colorScheme="coolGray" onPress={()=>setShow({...show,delete:false})}>
                                     Cancelar
                                 </Button>
-                                <Button  size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
+                                <Button onPress={()=>{handleDelete(predio.id);}} size='lg' colorScheme='rgb(255, 37, 0)' _text={{color:'white'}}>
                                     Confirmar 
                                 </Button>
                                 </Button.Group>
@@ -2479,7 +2716,11 @@ export const Configuracion = ({navigation}) => {
 
     const [errors, setError] = React.useState({});
     const handleParam = (type) =>{
-
+    
+    }
+    const closeSession = () => {
+        dispatch({type:'@close/session'});
+        navigation.navigate('login');
     }
     return (
         <Box >
@@ -2505,7 +2746,7 @@ export const Configuracion = ({navigation}) => {
             
             <Button.Group space={2}>
                 <VStack width='100%'>
-                    <Button  variant='outline' colorScheme='orange'>Cerrar sesión</Button>
+                    <Button onPress={() => closeSession()} variant='outline' colorScheme='orange'>Cerrar sesión</Button>
                     <Button  variant='outline' colorScheme='red'>Eliminar cuenta</Button>
                 </VStack>
                 

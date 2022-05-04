@@ -1,7 +1,10 @@
 
 const api = 'http://192.168.1.250/request/';
 
-// Usuario
+
+//////////////
+// Usuario///
+/////////////
 export const setSession = (token) =>{
     return {
         type: '@set/jwt',
@@ -66,16 +69,94 @@ export const getPerfil = (tkn) => {
         }
     }
 }
-
-// Hato
-
+///////////
+// Hato////
+///////////
+export const createAnimal = async (tkn,data) => {
+    try {
+        var formData = new FormData();
+        formData.append('arete',data.arete);
+        formData.append('name',data.name);
+        formData.append('sex',data.sex);
+        formData.append('nac',data.nac);
+        formData.append('race',data.race);
+        formData.append('color',data.color);
+        const response = await fetch(
+            api+'cAnimal.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const deleteAnimal = async (tkn,arete) => {
+    try {
+        var formData = new FormData();
+        formData.append('arete',arete);
+        const response = await fetch(
+            api+'dAnimal.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const updateAnimal = async (tkn,arete,type,word) => {
+    try {
+        var formData = new FormData();
+        formData.append('arete',arete);
+        formData.append('type',type);
+        formData.append('word',word);
+        const response = await fetch(
+            api+'uAnimal.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
 export const setHato = (animals) => { 
     return {
         type: '@set/hato',
         payload: {hato:animals}
     }
 }
-
 const initHato = (animals,mtr = null) => {
     if(animals === true) 
         return {
@@ -111,8 +192,96 @@ export const getHato = (tkn) => {
     }
 }
 
-
-// Vacunas
+export const addAnimal = (animal) => {
+    return{
+        type:'@add/animal',
+        payload:animal
+    }
+}
+export const dropAnimal = (arete) => {
+    return{
+        type:'@drop/animal',
+        payload:arete
+    }
+}
+/////////////////
+// Vacunas///
+///////////////
+export const createVacuna = async (tkn,data) => {
+    try {
+        var formData = new FormData();
+        formData.append('name',data.name);
+        formData.append('fecha',data.fecha);
+        const response = await fetch(
+            api+'cVacuna.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const deleteVacuna = async (tkn,vacuna) => {
+    try {
+        var formData = new FormData();
+        formData.append('id',vacuna);
+        const response = await fetch(
+            api+'dVacuna.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const updateVacuna = async (tkn,vacuna,type,word) => {
+    try {
+        var formData = new FormData();
+        formData.append('id',vacuna);
+        formData.append('type',type);
+        formData.append('word',word);
+        const response = await fetch(
+            api+'uVacuna.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
 export const setVacunas = (vac) => { 
     return {
         type: '@set/vacunas',
@@ -154,6 +323,18 @@ export const getVacunas = (tkn) => {
     }
 
 }
+export const addVacuna = (vacuna) => {
+    return{
+        type:'@add/vacuna',
+        payload:vacuna
+    }
+}
+export const dropVacuna = (id) => {
+    return{
+        type:'@drop/vacuna',
+        payload:id
+    }
+}
 // Vacunas Animales
 export const setVacunaAnimal = (vac_ani,mtr) => {
     return {
@@ -184,8 +365,84 @@ export const getVacunaAnimal = (tkn) => {
         }
     }
 }
-
-// Controles sanitarios
+//////////////////////////
+// Controles sanitarios //
+/////////////////////////
+export const createSanitario = async (tkn,data) => {
+    try {
+        var formData = new FormData();
+        formData.append('name',data.name);
+        formData.append('fecha',data.fecha);
+        const response = await fetch(
+            api+'cSanitario.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const deleteSanitario = async (tkn,sanitario) => {
+    try {
+        var formData = new FormData();
+        formData.append('id',sanitario);
+        const response = await fetch(
+            api+'dSanitario.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const updateSanitario = async (tkn,sanitario,type,word) => {
+    try {
+        var formData = new FormData();
+        formData.append('id',sanitario);
+        formData.append('type',type);
+        formData.append('word',word);
+        const response = await fetch(
+            api+'uSanitario.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
 export const setSanitarios = (controls) => {
     return {
         type: '@set/sanitarios',
@@ -223,6 +480,18 @@ export const getSanitarios = (tkn) => {
         }catch(error){
             return false;
         }
+    }
+}
+export const addSanitario = (sanitario) => {
+    return{
+        type:'@add/sanitario',
+        payload:sanitario
+    }
+}
+export const dropSanitario = (id) => {
+    return{
+        type:'@drop/sanitario',
+        payload:id
     }
 }
 //Ctl_Animal
@@ -328,6 +597,82 @@ export const getCrias = (tkn) => {
 }
 
 // Predios
+export const createPredio = async (tkn,data) => {
+    try {
+        var formData = new FormData();
+        formData.append('name',data.name);
+        formData.append('agua',data.agua);
+        formData.append('pasto',data.pasto);
+        const response = await fetch(
+            api+'cPredio.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const deletePredio = async (tkn,predio) => {
+    try {
+        var formData = new FormData();
+        formData.append('id',predio);
+        const response = await fetch(
+            api+'dPredio.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const updatePredio = async (tkn,predio,type,word) => {
+    try {
+        var formData = new FormData();
+        formData.append('id',predio);
+        formData.append('type',type);
+        formData.append('word',word);
+        const response = await fetch(
+            api+'uPredio.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
 export const setPredios = (pre) => { 
     return {
         type: '@set/predios',
@@ -439,21 +784,162 @@ export const getPesajes = (tkn) => {
         }
     }
 }
+export const createPesaje = async (tkn,data) => {
+    try {
+        var formData = new FormData();
+        formData.append('arete',data.arete);
+        formData.append('peso',data.kg.toString());
+        formData.append('fecha',data.fecha);
 
-export const getRancho = (tkn) => {
+        const response = await fetch(
+            api+'cPesaje.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        console.log(msj);
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const deletePesaje = async (tkn,pesaje) => {
+    try {
+        var formData = new FormData();
+        formData.append('id',pesaje);
+        const response = await fetch(
+            api+'dPesaje.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+export const addPesaje = (pesaje) => {
+    return{
+        type:'@add/pesaje',
+        payload:pesaje
+    }
+}
+export const dropPesaje = (id) => {
+    return{
+        type:'@drop/pesaje',
+        payload:id
+    }
+}
+// Transacciones
+export const addTrans = (trans) => {
+    return {
+        type:'@add/trans',
+        payload:{tran:trans}
+    }
+}
+export const flushTrans = () => {
+    return{
+        type:'@flush/trans'
+    }
+}
+export const processTrans = async (tkn,trans,mtr) =>{
+    try{    
+        const mtw = await getTimeStamp();
+        var reject = 0;
+        await trans.forEach((tran) =>{
+            switch(tran.type){
+                case 'addAnimal':
+                    if(new Date(mtr.hato).getTime < new Date(mtw.hato).getTime)
+                        reject = + 1;
+                    else{
+                        var ins = createAnimal(tkn,tran.data);
+                        if(!ins)
+                            reject = + 1;
+                    }
+                    break;
+                case 'delAnimal':
+                    if(new Date(mtr.hato).getTime < new Date(mtw.hato).getTime)
+                        reject = + 1;
+                    else{
+                        var ins = deleteAnimal(tkn,tran.data);
+                        if(!ins)
+                            reject = + 1;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+        return reject
+    }catch(error){
+        console.log('err',error);
+        return false;
+    }
+}
+
+// Sincronizacion
+const getTimeStamp = async(tkn) =>{
+    try{
+        let res = await fetch(api+'gMTW.php',{
+                method: 'GET',
+                headers: {'Authorization':'Bearer '+tkn}
+                })
+        
+        const mtw = await res.json();
+        if(mtw!=false)
+            return mtw
+        else
+            return false
+    }catch(error){
+        console.log('err',error);
+        return false;
+    }
+}
+export const getRancho = (tkn,mtr) => {
     return async (dispatch) =>{
         try{
-            dispatch(getHato(tkn));
-            dispatch(getPerfil(tkn));
-            dispatch(getEmbarazos(tkn));
-            dispatch(getCrias(tkn));
-            dispatch(getSanitarios(tkn))
-            dispatch(getControlAnimal(tkn));
-            dispatch(getPesajes(tkn));
-            dispatch(getPredios(tkn));
-            dispatch(getPredioAnimal(tkn));
-            dispatch(getVacunas(tkn));
-            dispatch(getVacunaAnimal(tkn));
+            var mtw = await getTimeStamp(tkn);
+
+            if(mtr.hato == null || new Date(mtr.hato).getTime <= new Date(mtw.hato).getTime)
+                await dispatch(getHato(tkn));
+            if(mtr.perfil == null || new Date(mtr.perfil).getTime <= new Date(mtw.perfil).getTime)
+                await dispatch(getPerfil(tkn));
+            if(mtr.embarazos == null || new Date(mtr.embarazos).getTime < new Date(mtw.embarazos).getTime)
+                await dispatch(getEmbarazos(tkn));
+            if(mtr.crias == null || new Date(mtr.crias).getTime < new Date(mtw.crias).getTime)
+                await dispatch(getCrias(tkn));
+            if(mtr.sanitarios == null || new Date(mtr.sanitarios).getTime < new Date(mtw.sanitarios).getTime)
+                await dispatch(getSanitarios(tkn));
+            if(mtr.ctl_animal == null || new Date(mtr.ctl_animal).getTime < new Date(mtw.ctl_animal).getTime)
+                await dispatch(getControlAnimal(tkn));
+            if(mtr.pesajes == null || new Date(mtr.pesajes).getTime < new Date(mtw.pesajes).getTime)
+                await dispatch(getPesajes(tkn));
+            if(mtr.predios == null || new Date(mtr.predios).getTime < new Date(mtw.predios).getTime)
+                await dispatch(getPredios(tkn));
+            if(mtr.predio_animal == null || new Date(mtr.predio_animal).getTime < new Date(mtw.predio_animal).getTime)
+                await dispatch(getPredioAnimal(tkn));
+            if(mtr.vacunas == null || new Date(mtr.vacunas).getTime < new Date(mtw.vacunas).getTime)
+                await dispatch(getVacunas(tkn));
+            if(mtr.vac_animal == null || new Date(mtr.vac_animal).getTime < new Date(mtw.vac_animal).getTime)
+                await dispatch(getVacunaAnimal(tkn));
         }catch(error){
             console.log(error);
             return false;

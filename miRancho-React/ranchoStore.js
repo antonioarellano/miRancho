@@ -1,8 +1,10 @@
 import { createStore, applyMiddleware } from 'redux';
 import rootReducer from './ranchoReducer';
 import thunk from 'redux-thunk';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import { persistStore, persistReducer } from 'redux-persist';
 
-// const persistConfig = {key: 'toor',storage: AsyncStorage,}
+const persistConfig = {key: 'toor',storage: AsyncStorage}
 
 var initialState = {
   jwt:false,
@@ -23,16 +25,20 @@ var initialState = {
   bkpPredios:false,
   predio_animal:[],
   perfil:[],
-  errors: {hato:null,},
-  mtr:{hato:null,sanitarios:null,ctl_animal:null,crias:null,embarazos:null,pesajes:null,predios:null,predio_animal:null,perfil:null,vacunas:null,vac_animal:null} 
+  errors: {hato:null,trans:0},
+  trans:[],
+  mtr:{hato:null,sanitarios:null,ctl_animal:null,crias:null,embarazos:null,pesajes:null,predios:null,predio_animal:null,perfil:null,vacunas:null,vac_animal:null}, 
+  local:{sanitarios:0,predios:0,vacunas:0}
 }
-// const persistedReducer = persistReducer(persistConfig, ranchoReducer); 
-// let persistor = persistStore(ranchoStore);
+const persistedReducer = persistReducer(persistConfig, rootReducer); 
+
 export default function Store(){
-    return createStore(
-      rootReducer,
+    let store = createStore(
+      persistedReducer,
       initialState,
-      applyMiddleware(thunk)
+      applyMiddleware(thunk) 
     );
+    let persistor = persistStore(store);
+    return [store, persistor]
 }
 

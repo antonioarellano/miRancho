@@ -1,3 +1,27 @@
+var initialState = {
+    jwt:false,
+    hato:[{arete:'0',name:'N/A'}],
+    bkpHato:false,
+    sanitarios:[{id:'0',name:'N/A',fecha:'N/A'}],
+    bkpSanitarios:false,
+    ctl_animal:[],
+    embarazos:[],
+    bkpEmbarazos:false,
+    cria:[],
+    vacunas:[{id:'0',name:'N/A',fecha:'N/A'}],
+    bkpVacunas:false,
+    vac_animal:[],
+    pesajes:[{id:'0',date:'N/A',kg:'N/A'}],
+    bkpPesajes:false,
+    predios:[{name:'N/A',agua:true, pasto:true}],
+    bkpPredios:false,
+    predio_animal:[],
+    perfil:[],
+    errors: {hato:null,trans:0},
+    trans:[],
+    mtr:{hato:null,sanitarios:null,ctl_animal:null,crias:null,embarazos:null,pesajes:null,predios:null,predio_animal:null,perfil:null,vacunas:null,vac_animal:null}, 
+    local:{sanitarios:0,predios:0,vacunas:0}
+  }
 
 function rootReducer(state, action){
     switch (action.type){
@@ -8,7 +32,9 @@ function rootReducer(state, action){
             return {...state,perfil:action.payload.perfil};
         case '@init/perfil':
             return {...state,perfil:action.payload.perfil, mtr:{...state.mtr,perfil:action.payload.mt}};
-        //Hato   
+        case '@close/session':
+            return{initialState}
+            //Hato   
         case '@set/hato':
             return {...state,hato:action.payload.hato}; 
         case '@set/bkpHato':
@@ -67,18 +93,100 @@ function rootReducer(state, action){
             return {...state,bkpPesajes:action.payload.pesajes} 
         case '@init/pesajes':
             return {...state,bkpPesajes:action.payload.pesajes,pesajes:action.payload.pesajes,mtr:{...state.mtr,pesajes:action.payload.mt}}
-        
-            
-        case '@create/animal':
-            return {...state, animales:[...state.animales,action.payload]}
-        case '@create/sanitario':
-            return {...state, sanitario:[...state.sanitarios,action.payload]}
-        case '@create/embarazo':
+        //Transacciones
+        case '@add/trans':
+            return {...state,trans:[...state.trans,action.payload.tran]}
+        case '@flush/trans':
+            return {...state,trans:[]}
+        ///////////////////////
+        //Agregar localmente
+        /////////////////////
+        case '@add/animal':
+            return {...state, hato:[...state.hato,action.payload]}
+        case '@add/cria':
+            return {...state, crias:[...state.crias, action.payload]}
+        case '@add/sanitario':
+            const san = state.local.sanitario - 1;
+            const nSan = Object.assign(state.payload,{id:san});
+            return {...state, sanitarios:[...state.sanitarios,nSan], local:{...state.local,sanitarios:san}}
+        case '@add/embarazo':
             return {...state, embarazos:[...state.embarazos,action.payload]}
-        case '@create/peso':
-            return {...state, pesos:[...state.pesos,action.payload]}
-        case '@create/predio':
-            return {...state, predios:[...state.predios, action.payload]}
+        case '@add/pesaje':
+            return {...state, pesajes:[...state.pesajes,action.payload]}
+        case '@add/vacuna':
+            const vac = state.local.vacunas - 1;
+            const nVac = Object.assign(state.payload,{id:san});
+            return {...state, vacunas:[...state.vacunas,nVac], local:{...state.local,vacunas:vac}};
+        case '@add/predio':
+            const pre = state.local.predios - 1;
+            const nPre = Object.assign(state.payload,{id:pre});
+            return {...state, predios:[...state.predios,nPre], local:{...state.local,predios:pre}};
+
+        case '@add/vacAnimal':
+            return {...state, vac_animal:[...state.vac_animal,action.payload]}
+        case '@add/sanAnimal':
+            return {...state, ctl_animal:[...state.ctl_animal,action.payload]}
+        case '@add/preAnimal':
+            return {...state, predio_animal:[...state.pre_animal,action.payload]}
+        ////////////////////////////
+            //Eliminar localmente //
+        ///////////////////////////
+        case '@drop/animal':
+            const nHato = state.hato.filter(animal =>{
+                if(animal.arete != action.payload)
+                    return true;
+            });
+            const nAnimal_Vac = state.vac_animal.filter(rel =>{
+                if(rel.arete != action.payload)
+                    return true;
+            });
+            const nAnimal_San = state.ctl_animal.filter(rel =>{
+                if(rel.arete != action.payload)
+                    return true;
+            });
+            const nAnimal_Pre = state.predio_animal.filter(rel =>{
+                if(rel.arete != action.payload)
+                    return true;
+            });
+            return {...state, hato:nHato,vac_animal:nAnimal_Vac,ctl_animal:nAnimal_San,predio_animal:nAnimal_Pre}
+        case '@drop/vacuna':
+            const nVacunas = state.vacunas.filter(vacuna =>{
+                if(vacuna.id != action.payload)
+                    return true;
+            });
+            const nVac_Animal = state.vac_animal.filter(rel =>{
+                if(rel.vacuna != action.payload)
+                    return true;
+            });
+            return {...state, vacunas:nVacunas, vac_animal:nVac_Animal}
+        case '@drop/sanitario':
+            const nSanitarios= state.sanitarios.filter(sanitario =>{
+                if(sanitario.id != action.payload)
+                    return true;
+            });
+            const nCtl_Animal = state.ctl_animal.filter(rel =>{
+                if(rel.ctl != action.payload)
+                    return true;
+            });
+            return {...state, sanitarios:nSanitarios, ctl_animal:nCtl_Animal}
+        case '@drop/embarazo':
+            return {...state, embarazos:[...state.embarazos,action.payload]}
+        case '@drop/pesaje':
+            const nPesajes= state.pesajes.filter(pesaje =>{
+                if(pesaje.id != action.payload)
+                    return true;
+            });
+            return {...state, pesajes:nPesajes}
+        case '@drop/predio':
+            const nPredios= state.predios.filter(predio =>{
+                if(predio.id != action.payload)
+                    return true;
+            });
+            const nPre_Animal = state.pre_animal.filter(rel =>{
+                if(rel.predio != action.payload)
+                    return true;
+            });
+            return {...state, predios:nPredios, pre_animal:nPre_Animal}
 
         case '@error/hato':
             return {...state,errors:{...state.errors,hato:action.payload.msj}}

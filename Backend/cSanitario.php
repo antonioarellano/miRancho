@@ -3,12 +3,8 @@
     require('bearerToken.php');
     require ('dConn.php');
 
-    $arete = $_POST['arete']; 
-    $nombre = $_POST['name']; 
-    $sexo = $_POST['sex']; 
-    $nac = $_POST['nac']; 
-    $raza = $_POST['race'];
-    $color = $_POST['color'];
+    $name = $_POST['name']; 
+    $fecha = $_POST['fecha']; 
     
     $tkn = getBearerToken();
     if(Auth::Check($tkn)){
@@ -19,10 +15,10 @@
             exit();
         }
         mysqli_set_charset($conexion, 'utf8mb4');
-        $sql = 'CALL cANIMAL(?,?,?,?,?,?,?);';
+        $sql = 'CALL cSANITARIO(?,?,?);';
         $resultado = mysqli_prepare($conexion,$sql);
         // i int,  s string, f float 
-        $ok = mysqli_stmt_bind_param($resultado,'sssssss',$arete,$nombre,$sexo,$nac,$raza,$color,$id);
+        $ok = mysqli_stmt_bind_param($resultado,'sss',$name,$fecha,$id);
         $ok = mysqli_stmt_execute($resultado);
         if ($ok == false){
             echo '0';

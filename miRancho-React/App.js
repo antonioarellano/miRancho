@@ -14,6 +14,7 @@ import * as screens from './screens';
 
 import { Provider } from 'react-redux';
 import Store from './ranchoStore';
+import { PersistGate } from 'redux-persist/integration/react';
 
 const NavLogin = createNativeStackNavigator();
 const NavRancho = createDrawerNavigator();
@@ -44,20 +45,21 @@ const Rancho = ({navigation}) => {
     </NavRancho.Navigator>
   );
 }
-
-const store = Store();
+const [store,persistor] = Store();
 
 export default function App() {
   return (
           <Provider store={store}>
-            <NativeBaseProvider>
-              <NavigationContainer>
-                <NavLogin.Navigator screenOptions={{headerShown: false}}>
-                  <NavMain.Screen name='inicio' component={Inicio} />
-                  <NavMain.Screen name='rancho' component={Rancho} />
-                </NavLogin.Navigator>
-              </NavigationContainer>
-            </NativeBaseProvider>
+            <PersistGate  loading={null} persistor={persistor}>
+              <NativeBaseProvider>
+                <NavigationContainer>
+                  <NavLogin.Navigator screenOptions={{headerShown: false}}>
+                    <NavMain.Screen name='inicio' component={Inicio} />
+                    <NavMain.Screen name='rancho' component={Rancho} />
+                  </NavLogin.Navigator>
+                </NavigationContainer>
+              </NativeBaseProvider>
+            </PersistGate>
           </Provider>
   );
 }
