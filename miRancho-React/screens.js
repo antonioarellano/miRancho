@@ -10,7 +10,7 @@ import * as action from './ranchoActions';
 
 
 // CONSTANTES GLOBALES
-const api = 'http://192.168.1.250/request/';
+const api = '192.168.100.99/request/';
 
 ///////////////////////////////////////
   // Screens - Navegacion de Inicio //
@@ -27,9 +27,11 @@ export const LogIn = ({navigation}) => {
     const [errors, setError] = React.useState({});
 
     React.useEffect(() => {
-        // dispatch(action.setSession('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTI0ODY5NzgsInVzZXIiOiJwcnVlYmEifQ.D9z3QEagJ-ACpalDB68npB9h-pxVGntJbHFRP7wqXNc'))
-        if(session != false)
-            navigation.navigate('getData');  
+        if(session != false){
+            console.log(session);
+            navigation.navigate('getData'); 
+        }
+             
     },[]);
     const HandleLogin = () => {
         if(cntLogin > 10)
@@ -37,10 +39,14 @@ export const LogIn = ({navigation}) => {
         else
             NetInfo.fetch().then(state=>{
                 if(state.isConnected){
+                    
                     setCounter(cntLogin+1);
                     dispatch(action.getSession(data.user, data.pass)).then(s => {
-                        if(s)
+                        if(s){
+                            console.log(s);
                             navigation.navigate('getData');
+                        }
+                            
                         else
                             toast.show({title:'Credenciales incorrectas',status:'warning', description: "Intente de nuevo"});
                     });
@@ -339,7 +345,7 @@ export const Terms = ({navigation}) => {
 //Screen getData-Rancho
 export const GetRancho = ({navigation}) => {
     const tkn = useSelector(state => state.jwt);
-    const mtr = useSelector(state => state.mtr);
+    const mtr = useSelector(state => state);
     const trans = useSelector(state => state.trans);
     const [show, setShow] = React.useState(false);
     const dispatch = useDispatch();
@@ -349,14 +355,15 @@ export const GetRancho = ({navigation}) => {
     const getData = () => {
         NetInfo.fetch().then((state) => { 
             if(state.isConnected){
-                if(trans.length > 0){
+                /*if(trans.length > 0){
                     var reject = action.processTrans(tkn,trans,mtr);
                     if(reject > 0)
                         toast.show({title:'Error en transacciones',status:'error',description:reject});
                     else
                         toast.show({title:'Sincronización exitosa',status:'info'});
                     dispatch(action.flushTrans());
-                }
+                }*/
+
                 dispatch(action.getRancho(tkn,mtr)).then(msj => {
                     if(msj === false){
                         toast.show({title:'Error con el servidor',status:'warning' ,description:'Intente de nuevo'});
@@ -2642,81 +2649,50 @@ export const Embarque = ({navigation}) => {
     );
 }
 
-
 //Screen Configuracion
-export const setConfig = ({route, navigation}) => {
-    const {type, data} = route.params;
-    const [ndata, setData] = React.useState({})
-    switch(type){
-        case 'Usuario':
-            return(
-                <Box>
-                    <FormControl>
-                        <FormControl.Label>Establecer nuevo</FormControl.Label>
-                        <Input placeholder = {type} value={ndata} onChangeText = {(value) => setData(value)}/>
-                    </FormControl>
-                    <Button colorScheme='warning'>Actualizar</Button>
-                </Box>
-            );
-            break;
-        case 'Nombre':
-            return(
-                <Box>
-                    <FormControl>
-                        <FormControl.Label>Establecer nuevo</FormControl.Label>
-                        <Input placeholder = {type} value={ndata} onChangeText = {(value) => setData(value)}/>
-                    </FormControl>
-                    <Button colorScheme='warning'>Actualizar</Button>
-                </Box>
-            );
-            break;
-        case 'Contraseña':
-            const [cpass, setPass] = React.useState('')
-            return(
-                <Box>
-                    <FormControl>
-                        <FormControl.Label>Establecer nueva</FormControl.Label>
-                        <Input placeholder = {type} type='password' value={ndata} onChangeText = {(value) => setData(value)}/>
-                        <Input placeholder = 'Confirmar' type='password' value={cpass} onChangeText = {(value) => setPass(value)}/>
-                    </FormControl>
-                    <Button colorScheme='warning'>Actualizar</Button>
-                </Box>
-            );
-            break;
-        case 'Dirección':
-            return(
-                <Box>
-                    <FormControl>
-                        <FormControl.Label>Establecer nueva</FormControl.Label>
-                        <Input placeholder = {type} value={ndata} onChangeText = {(value) => setData(value)}/>
-                    </FormControl>
-                    <Button colorScheme='warning'>Actualizar</Button>
-                </Box>
-            );
-            break;
-        case 'Teléfono':
-            return(
-                <Box>
-                    <FormControl>
-                        <FormControl.Label>Establecer nuevo</FormControl.Label>
-                        <Input placeholder = {type} keyboardType='numeric' value={ndata} onChangeText = {(value) => setData(value)}/>
-                    </FormControl>
-                    <Button colorScheme='warning'>Actualizar</Button>
-                </Box>
-            );
-            break;
-    }
-}
 
 export const Configuracion = ({navigation}) => {
     const tkn = useSelector(state => state.jwt);
     const perfil = useSelector(state => state.perfil);
     const dispatch = useDispatch();
         // user,name,pass,cpass,address, phone.
-
+    const [show, setShow] = React.useState(false);
     const [errors, setError] = React.useState({});
-    const handleParam = (type) =>{
-    
+    const [update, setUpdate] = React.useState({});
+    const [pass, setPass] = React.useState({show:false});
+    const toast = useToast();
+    const handleUpdate =async() => {
+        if(update.id == 'username')
+            toast.show({title:'Imposible actualizar username',status:'error',description:'Ponerse en contacto con el administrador'});
+        else{
+            var upd = await action.updatePerfil(tkn,{type:update.id,word:update.nValue});
+            if(upd == true){
+                dispatch(action.getPerfil(tkn));
+                if(update.type != 'pass')
+                    setShow(false);
+                else
+                    setPass({...pass,show:false});
+                toast.show({title:'Actualizacion exitosa',status:'success'});
+                
+            }else{
+                if(update.type != 'pass')
+                    setShow(false);
+                else
+                    setPass({...pass,show:false});
+                toast.show({title:'Error con el servidor',status:'error',description:'Intente de nuevo'});
+            }
+        }    
+    }
+    const handleParam = (item) =>{
+        setUpdate(item);
+        setShow(true);
+    }
+    const handlePass = () => {
+        if(pass.word == pass.cword){
+            setUpdate({id:'pass',nValue:pass.word});
+            handleUpdate();
+        }else
+            toast.show({title:'Las contraseñas no coinciden',status:'error',description:'Intente de nuevo'})
     }
     const closeSession = () => {
         dispatch({type:'@close/session'});
@@ -2724,12 +2700,13 @@ export const Configuracion = ({navigation}) => {
     }
     return (
         <Box >
-            <Box bgColor='#DEDDDA' >
+            <Box bgColor='gray' >
                 <Center>
-                    <Heading size='sm'>Actualizar datos</Heading>
+                    <Heading size='lg'>Actualizar perfil</Heading>
                 </Center>
             </Box>
             <FlatList
+                margin={1}
                 data={perfil}
                 renderItem={({item}) => (
                     <Pressable onPress={() => handleParam(item)}>
@@ -2743,14 +2720,64 @@ export const Configuracion = ({navigation}) => {
                 )}
                 keyExtractor={(item) => item.id}
             />
-            
-            <Button.Group space={2}>
-                <VStack width='100%'>
-                    <Button onPress={() => closeSession()} variant='outline' colorScheme='orange'>Cerrar sesión</Button>
-                    <Button  variant='outline' colorScheme='red'>Eliminar cuenta</Button>
-                </VStack>
-                
-            </Button.Group>
+            <Divider marginY={2}/>
+
+            <VStack alignItems='center'  space={1}>
+                <Button style='outline' width='95%' colorScheme='purple' onPress={() => setPass({...pass,show:true})}>Cambiar contraseña</Button>
+                <Button width='95%' onPress={() => closeSession()} colorScheme='orange'>Cerrar sesión</Button>
+                <Divider></Divider>
+                <Button width='95%' colorScheme='red'>Eliminar cuenta</Button>
+            </VStack>
+            <Modal onClose={()=>setShow(false)} isOpen={show} >
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header >Nuevo {update.id}</Modal.Header>
+                    <Modal.Body>
+                        <FormControl>
+                            <Input placeholder={update.value} onChangeText={(value)=>{setUpdate({...update,nValue:value})}}/>
+                        </FormControl>
+                    </Modal.Body>
+                    <Modal.Footer>
+                    <Button.Group space={2}>
+                        <Button 
+                            colorScheme="coolGray" 
+                            variant="ghost" 
+                            onPress={()=>setShow(false)}> 
+                            Cancelar
+                        </Button>
+                            <Button colorScheme="warning" 
+                                onPress={()=> {
+                                handleUpdate();
+                            }}>Actualizar</Button>
+                        </Button.Group>
+                    </Modal.Footer>
+                </Modal.Content>
+            </Modal>
+            <Modal onClose={()=>setPass({...pass,show:false})} isOpen={pass.show} >
+                <Modal.Content>
+                    <Modal.CloseButton/>
+                    <Modal.Header >Nuevo contraseña</Modal.Header>
+                    <Modal.Body>
+                        <FormControl>
+                            <Input placeholder='Nueva contraseña' type='password' onChangeText={(value)=>{setPass({...pass,word:value})}}/>
+                        </FormControl>
+                        <FormControl>
+                            <Input placeholder='Confirmar contraseña' type='password' onChangeText={(value)=>{setPass({...pass,cword:value})}}/>
+                        </FormControl>
+                    </Modal.Body>
+                    <Modal.Footer>
+                    <Button.Group space={2}>
+                        <Button 
+                            colorScheme="coolGray" 
+                            variant="ghost" 
+                            onPress={()=>{setPass({...pass,show:false});}}> 
+                            Cancelar
+                        </Button>
+                            <Button colorScheme="warning"  onPress={()=>{handlePass();}}>Actualizar</Button>
+                        </Button.Group>
+                    </Modal.Footer>
+                </Modal.Content>
+            </Modal>
         </Box>
     );
 }

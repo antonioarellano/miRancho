@@ -5,8 +5,8 @@
 
     $type = $_POST['type']; 
     $word = $_POST['word']; 
-   
     $tkn = getBearerToken();
+
     if(Auth::Check($tkn)){
         $id = Auth::GetData($tkn);
         $conexion = mysqli_connect($host,$user,$pass, $bd);
@@ -16,20 +16,17 @@
         }
         mysqli_set_charset($conexion, 'utf8mb4');
         switch($type){
+            case 'name':
+                $sql = 'CALL uUSER_NAME(?,?);';
+                break;
             case 'address':
                 $sql = 'CALL uUSER_ADDRESS(?,?);';
                 break;
             case 'mail':
                 $sql = 'CALL uUSER_MAIL(?,?);';
                 break;
-            case 'name':
-                $sql = 'CALL uUSER_NAME(?,?);';
-                break;
             case 'pass':
-                $sql = 'CALL uANIMAL_PASS(?,?);';
-                break;
-            case 'user':
-                $sql = 'CALL uANIMAL_USER(?,?);';
+                $sql = 'CALL uUSER_PASS(?,?);';
                 break;
             default:
                 break;

@@ -1,5 +1,5 @@
 
-const api = 'http://192.168.1.250/request/';
+const api = 'http://192.168.100.99/request/';
 
 
 //////////////
@@ -69,6 +69,32 @@ export const getPerfil = (tkn) => {
         }
     }
 }
+export const updatePerfil = async (tkn,update) => {
+    try {
+        var formData = new FormData();
+        formData.append('type',update.type);
+        formData.append('word',update.word);
+        const response = await fetch(
+            api+'uPerfil.php', 
+            {
+                method: 'POST',
+                headers: {'Authorization':'Bearer '+tkn},
+                body: formData
+            }
+        );
+        const msj = await response.text();
+        if (parseInt(msj) > 0){
+            return true;
+        }else{
+            return false;
+        }
+                
+    } catch (error) {
+        console.log('falta',error);
+        return false;
+    }
+}
+
 ///////////
 // Hato////
 ///////////
@@ -918,27 +944,27 @@ export const getRancho = (tkn,mtr) => {
         try{
             var mtw = await getTimeStamp(tkn);
 
-            if(mtr.hato == null || new Date(mtr.hato).getTime <= new Date(mtw.hato).getTime)
+            if(mtr.hato == undefined || new Date(mtr.hato).getTime <= new Date(mtw.hato).getTime)
                 await dispatch(getHato(tkn));
-            if(mtr.perfil == null || new Date(mtr.perfil).getTime <= new Date(mtw.perfil).getTime)
+            if(mtr.perfil == undefined || new Date(mtr.perfil).getTime <= new Date(mtw.perfil).getTime)
                 await dispatch(getPerfil(tkn));
-            if(mtr.embarazos == null || new Date(mtr.embarazos).getTime < new Date(mtw.embarazos).getTime)
+            if(mtr.embarazos == undefined || new Date(mtr.embarazos).getTime < new Date(mtw.embarazos).getTime)
                 await dispatch(getEmbarazos(tkn));
-            if(mtr.crias == null || new Date(mtr.crias).getTime < new Date(mtw.crias).getTime)
+            if(mtr.crias == undefined || new Date(mtr.crias).getTime < new Date(mtw.crias).getTime)
                 await dispatch(getCrias(tkn));
-            if(mtr.sanitarios == null || new Date(mtr.sanitarios).getTime < new Date(mtw.sanitarios).getTime)
+            if(mtr.sanitarios == undefined || new Date(mtr.sanitarios).getTime < new Date(mtw.sanitarios).getTime)
                 await dispatch(getSanitarios(tkn));
-            if(mtr.ctl_animal == null || new Date(mtr.ctl_animal).getTime < new Date(mtw.ctl_animal).getTime)
+            if(mtr.ctl_animal == undefined || new Date(mtr.ctl_animal).getTime < new Date(mtw.ctl_animal).getTime)
                 await dispatch(getControlAnimal(tkn));
-            if(mtr.pesajes == null || new Date(mtr.pesajes).getTime < new Date(mtw.pesajes).getTime)
+            if(mtr.pesajes == undefined || new Date(mtr.pesajes).getTime < new Date(mtw.pesajes).getTime)
                 await dispatch(getPesajes(tkn));
-            if(mtr.predios == null || new Date(mtr.predios).getTime < new Date(mtw.predios).getTime)
+            if(mtr.predios == undefined || new Date(mtr.predios).getTime < new Date(mtw.predios).getTime)
                 await dispatch(getPredios(tkn));
-            if(mtr.predio_animal == null || new Date(mtr.predio_animal).getTime < new Date(mtw.predio_animal).getTime)
+            if(mtr.predio_animal == undefined || new Date(mtr.predio_animal).getTime < new Date(mtw.predio_animal).getTime)
                 await dispatch(getPredioAnimal(tkn));
-            if(mtr.vacunas == null || new Date(mtr.vacunas).getTime < new Date(mtw.vacunas).getTime)
+            if(mtr.vacunas == undefined || new Date(mtr.vacunas).getTime < new Date(mtw.vacunas).getTime)
                 await dispatch(getVacunas(tkn));
-            if(mtr.vac_animal == null || new Date(mtr.vac_animal).getTime < new Date(mtw.vac_animal).getTime)
+            if(mtr.vac_animal == undefined || new Date(mtr.vac_animal).getTime < new Date(mtw.vac_animal).getTime)
                 await dispatch(getVacunaAnimal(tkn));
         }catch(error){
             console.log(error);

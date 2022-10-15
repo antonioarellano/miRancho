@@ -3,8 +3,8 @@
   "expoServerPort": null,
   "packagerPort": 19000,
   "packagerPid": null,
-  "expoServerNgrokUrl": null,
-  "packagerNgrokUrl": null,
-  "ngrokPid": null,
+  "expoServerNgrokUrl": "https://mb-cjh.anonymous.mirancho-react.exp.direct",
+  "packagerNgrokUrl": "https://packager.mb-cjh.anonymous.mirancho-react.exp.direct",
+  "ngrokPid": 14019,
   "webpackServerPort": null
 }
