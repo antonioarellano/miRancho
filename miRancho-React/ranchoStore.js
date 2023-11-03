@@ -27,7 +27,19 @@ var initialState = {
   perfil:[],
   errors: {hato:null,trans:0},
   trans:[],
-  mtr:{hato:0,sanitarios:0,ctl_animal:0,crias:0,embarazos:0,pesajes:0,predios:0,predio_animal:0,perfil:0,vacunas:0,vac_animal:0}, 
+  mtr:{
+    hato:0,
+    sanitarios:0,
+    ctl_animal:0,
+    crias:0,
+    embarazos:0,
+    pesajes:0,
+    predios:0,
+    predio_animal:0,
+    perfil:0,
+    vacunas:0,
+    vac_animal:0
+  }, 
   local:{sanitarios:0,predios:0,vacunas:0}
 }
 const persistedReducer = persistReducer(persistConfig, rootReducer); 

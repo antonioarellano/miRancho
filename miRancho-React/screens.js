@@ -7,6 +7,7 @@ import { Platform, SafeAreaViewBase } from 'react-native';
 
 import { useDispatch, useSelector } from 'react-redux';
 import * as action from './ranchoActions';
+import logo from './assets/favicon.png'
 
 
 // CONSTANTES GLOBALES
@@ -28,7 +29,7 @@ export const LogIn = ({navigation}) => {
 
     React.useEffect(() => {
         if(session != false){
-            console.log(session);
+            //console.log(session);
             navigation.navigate('getData'); 
         }
              
@@ -56,8 +57,10 @@ export const LogIn = ({navigation}) => {
             })
     }
     return(
-        < Box justifyContent='center'  flex= {1}>
-            <VStack>
+        < Box justifyContent='center'  flex= {1} padding='2em' alignItems='center'>
+            <img width='150px' src={logo}></img>
+            <Heading>Tu Rancho</Heading>
+            <VStack gap='.5em' justifyContent='center' width='50%' >
                 <FormControl isRequired isInvalid={'user' in errors}>
                     <FormControl.Label>Nombre de Usuario</FormControl.Label>
                     <Input 
@@ -70,7 +73,7 @@ export const LogIn = ({navigation}) => {
                     }
                 </FormControl>
 
-                <FormControl isRequired isInvalid={'pass' in errors}>
+                <FormControl  isRequired isInvalid={'pass' in errors}>
                     <FormControl.Label>Contraseña</FormControl.Label>
                     <Input 
                         placeholder='Contraseña'
@@ -85,11 +88,11 @@ export const LogIn = ({navigation}) => {
             </VStack>
 
             <Divider my={1}/>
-            <Button colorScheme='success' onPress={HandleLogin} size = 'lg'>Entrar</Button>
-            <Divider my={3}/>
-            <Button size = 'md' colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('recPass')}>Olvide mi contraseña</Button>
+            <Button colorScheme='success' onPress={HandleLogin} width='25%'>Entrar</Button>
             <Divider my={1}/>
-            <Button size = 'md' colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>  
+            <Button width='25%' colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('recPass')}>Olvide mi contraseña</Button>
+            <Divider my={1}/>
+            <Button width='25%' colorScheme='teal' variant = 'outline' onPress={() => navigation.navigate('singin')}>No tengo cuenta</Button>  
         </Box>
     );
 }
@@ -345,14 +348,14 @@ export const Terms = ({navigation}) => {
 //Screen getData-Rancho
 export const GetRancho = ({navigation}) => {
     const tkn = useSelector(state => state.jwt);
-    const mtr = useSelector(state => state);
+    const mtr = useSelector(state => state.mtr);
     const trans = useSelector(state => state.trans);
     const [show, setShow] = React.useState(false);
     const dispatch = useDispatch();
     const errors = useSelector((state) =>state.errors);
     const toast = useToast();
     
-    const getData = () => {
+    const getData = async() => {
         NetInfo.fetch().then((state) => { 
             if(state.isConnected){
                 /*if(trans.length > 0){
@@ -363,7 +366,7 @@ export const GetRancho = ({navigation}) => {
                         toast.show({title:'Sincronización exitosa',status:'info'});
                     dispatch(action.flushTrans());
                 }*/
-
+                
                 dispatch(action.getRancho(tkn,mtr)).then(msj => {
                     if(msj === false){
                         toast.show({title:'Error con el servidor',status:'warning' ,description:'Intente de nuevo'});
@@ -626,32 +629,36 @@ export const Hato = ({navigation}) => {
     }
     return(
         <View>
-            <Box>
-                <HStack space={2}>
+            <Box padding='.5em'>
+                <HStack space={2} justifyContent='center' padding='.5em'>
                     <Input onChangeText={handleSearch} value={search}placeholder="Buscar" variant="filled" width="80%" borderRadius="10" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
-                    <IconButton width='15%' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
+                    <IconButton width='60px' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
                         icon={<Icon  as={MaterialCommunityIcons} name="plus"/>}
                         onPress={()=>setShow({...show,register:true})}
+                       
                     />
                 </HStack>
-                <FlatList data={hato}  renderItem={({item}) => 
-                    <Pressable onPress={() => handleAnimal(item)}>
-                        <HStack borderBottomWidth="1" space='4' >
+                <FlatList data={hato}   renderItem={({item}) => 
+                    <Pressable onPress={() => handleAnimal(item)} width='100%' justifyContent='center'>
+                        <HStack space='3' justifyContent='center' width='90%' >
                             <Icon size="xl" as={MaterialCommunityIcons} name="cow" width='20%'/>
                             <VStack width="65%">
                                 <Heading>{item.arete}</Heading>
                                 <Text>{item.name}</Text>
                             </VStack>
-                            <SexIcon sex={item.sex}/>
+                            <SexIcon sex={item.sex} width= '15%' />
                         </HStack>               
                     </Pressable>
                 }
                 keyExtractor={item=>item.arete}
+                ItemSeparatorComponent={() => (
+                    <hr width='90%' />
+                  )}
                 />
                 <Text>{mt}</Text>             
             </Box>
             
-            <Modal isOpen={show.animal} onClose={() => setShow({...show,animal:false})} size='full'>
+            <Modal isOpen={show.animal} onClose={() => setShow({...show,animal:false})} size='xl'>
                 <Modal.Content >
                     <Modal.CloseButton />
                     <Modal.Header alignSelf="center" _text={{fontSize:'xl',Overridden:'bold'}}>{animal.arete}</Modal.Header>
@@ -709,7 +716,7 @@ export const Hato = ({navigation}) => {
                                 <Text fontSize='md'>{animal.sex}</Text>
                                 <Divider />
                             </Pressable>    
-                            <Modal isOpen={showPop.sex} onClose={() => setPop({...showPop,sex:false})} size='xl'>                    
+                            <Modal isOpen={showPop.sex} onClose={() => setPop({...showPop,sex:false})} size='md'>                    
                                 <Modal.Content >
                                     <Modal.Header alignContent='center'>Actualizar sexo</Modal.Header>
                                     <Modal.Body>
@@ -745,7 +752,7 @@ export const Hato = ({navigation}) => {
                                 <Text fontSize='md'>{animal.race}</Text>
                                 <Divider />
                             </Pressable>    
-                            <Modal isOpen={showPop.race} onClose={() => setPop({...showPop,race:false})} size='xl'>
+                            <Modal isOpen={showPop.race} onClose={() => setPop({...showPop,race:false})} size='md'>
                                 <Modal.Content >
                                     <Modal.Header alignContent='center'>Actualizar raza</Modal.Header>
                                     <Modal.Body>
@@ -772,7 +779,7 @@ export const Hato = ({navigation}) => {
                                 <Text fontSize='md'>{animal.color}</Text>
                                 <Divider />
                             </Pressable>    
-                            <Modal isOpen={showPop.color} onClose={() => setPop({...showPop,color:false})} size='xl'>
+                            <Modal isOpen={showPop.color} onClose={() => setPop({...showPop,color:false})} size='md'>
                                 <Modal.Content>
                                     <Modal.Header alignContent='center'>Actualizar color</Modal.Header>
                                     <Modal.Body>
@@ -900,7 +907,7 @@ export const Hato = ({navigation}) => {
                 </Modal.Content>
             </Modal>
 
-            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})} size='full' >
+            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})} size='xl' >
                 <Modal.Content>
                     <Modal.CloseButton/>
                     <Modal.Header alignContent='center'>Registrar animal</Modal.Header>
@@ -1238,16 +1245,16 @@ export const Vacunas = ({navigation }) => {
     return (
         <View>
             <Box>
-                <HStack space={2}>
+                <HStack space={2} padding='.5em' justifyContent='center'>
                     <Input onChangeText={handleSearch} value={search}placeholder="Buscar" variant="filled" width="80%" borderRadius="10" borderWidth="0" InputLeftElement={<Icon ml="2" size="4" color="gray.400" as={<Ionicons name="ios-search" />} />} />
-                    <IconButton width='15%' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
+                    <IconButton width='60px' colorScheme='rgb(173, 0, 255)' borderRadius="xl" variant="solid"  size="lg"
                         icon={<Icon  as={MaterialCommunityIcons} name="plus"/>}
                         onPress={()=>setShow({...show,register:true})}
                     />
                 </HStack>
                 <FlatList data={vacunas}  renderItem={({item}) => 
-                    <Pressable onPress={() => handleVacuna(item)}>
-                        <HStack borderBottomWidth="1" space='4' >
+                    <Pressable onPress={() => handleVacuna(item)} width='100%' justifyContent='center'>
+                        <HStack space='3' width='90%' justifyContent='center' >
                             <Icon size="xl" as={MaterialCommunityIcons} name="needle" width='20%'/>
                             <VStack width="65%">
                                 <Heading>{item.id}</Heading>
@@ -1257,11 +1264,15 @@ export const Vacunas = ({navigation }) => {
                     </Pressable>
                 }
                 keyExtractor={item=>item.id}
+                ItemSeparatorComponent={() => (
+                    <hr width='90%' />
+                  )}
                 />
+               
                 <Text>{mt}</Text>             
             </Box>
 
-            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})}>
+            <Modal isOpen={show.register} onClose={()=>setShow({...show,register:false})} size='xl'>
                 <Modal.Content>
                     <Modal.CloseButton/>
                     <Modal.Header>Registrar vacuna</Modal.Header>
@@ -1319,7 +1330,7 @@ export const Vacunas = ({navigation }) => {
                 </Modal.Content> 
             </Modal>
 
-            <Modal isOpen={show.vacuna} onClose={() => setShow({...show,vacuna:false})} size='full'>
+            <Modal isOpen={show.vacuna} onClose={() => setShow({...show,vacuna:false})} size='xl'>
                 <Modal.Content >
                     <Modal.CloseButton />
                     <Modal.Header alignSelf="center" _text={{fontSize:'xl',Overridden:'bold'}}>{vacuna.id}</Modal.Header>
@@ -1422,7 +1433,7 @@ export const Vacunas = ({navigation }) => {
                 </Modal.Content>
             </Modal>
 
-            <Modal isOpen={show.animals} onClose={()=>setShow({...show,animals:false})} size='full' >
+            <Modal isOpen={show.animals} onClose={()=>setShow({...show,animals:false})} size='xl' >
                 <Modal.Content>
                     <Modal.CloseButton/>
                     <Modal.Header alignContent='center'>Animales</Modal.Header>
@@ -2205,7 +2216,7 @@ export const Predios = ( {navitagion}) => {
                 });
             }else{
                 dispatch(action.addTrans({type:'addPredio',data:nuevo}));
-                dispatch(action.addPredio(nuevo));
+                dispatch(action.createPredio(nuevo));
             }
         });
     }
@@ -2224,7 +2235,7 @@ export const Predios = ( {navitagion}) => {
                 });
             }else{
                 dispatch(action.addTrans({type:'delPredio',data:id}));
-                dispatch(action.dropPredio(id));
+                dispatch(action.deletePredio(id));
             }
         });
     }

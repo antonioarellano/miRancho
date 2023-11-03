@@ -1,5 +1,5 @@
 
-const api = 'http://192.168.100.99/request/';
+const api = 'http://localhost/turancho/';
 
 
 //////////////
@@ -36,6 +36,7 @@ export const getSession = (usr, pass) => {
                 }
             );
             const responseTxt = await response.text();
+            console.log(responseTxt);
             if(responseTxt != false){
                 dispatch(setSession(responseTxt));
                 return true;
@@ -59,10 +60,13 @@ export const getPerfil = (tkn) => {
             ])
             const perfil = await per.json();
             const mtr = await mt.text();
-            if(perfil!=false)
+            if(perfil!=false){
                 dispatch(initPerfil(perfil,mtr));
-            else
+                return true;
+            }else{
                 dispatch(initPerfil(true,mtr));
+                return true;
+            }
         }catch(error){
             console.log(error);
             return false;
@@ -582,10 +586,14 @@ export const getEmbarazos = (tkn) => {
             const embarazos = await emb.json();
             const mtr = await mt.text();
             
-            if(embarazos!=false)
+            if(embarazos!=false){
                 dispatch(initEmbarazos(embarazos,mtr));
-            else
+                return true;
+            }else{
                 dispatch(initEmbarazos(true,mtr));
+                return true;
+            }
+                
             }catch(error){
                 console.log(error);
                 return false;
@@ -924,6 +932,7 @@ export const processTrans = async (tkn,trans,mtr) =>{
 // Sincronizacion
 const getTimeStamp = async(tkn) =>{
     try{
+        console.log(tkn)
         let res = await fetch(api+'gMTW.php',{
                 method: 'GET',
                 headers: {'Authorization':'Bearer '+tkn}
@@ -942,29 +951,44 @@ const getTimeStamp = async(tkn) =>{
 export const getRancho = (tkn,mtr) => {
     return async (dispatch) =>{
         try{
-            var mtw = await getTimeStamp(tkn);
-
-            if(mtr.hato == undefined || new Date(mtr.hato).getTime <= new Date(mtw.hato).getTime)
+            
+            let mtw = await getTimeStamp(tkn);
+            
+            if(mtr.hato == 0 || new Date(mtr.hato).getTime <= new Date(mtw.hato).getTime){
+               
                 await dispatch(getHato(tkn));
-            if(mtr.perfil == undefined || new Date(mtr.perfil).getTime <= new Date(mtw.perfil).getTime)
+
+            }
+                
+            if(mtr.perfil == 0 || new Date(mtr.perfil).getTime <= new Date(mtw.perfil).getTime){
+
                 await dispatch(getPerfil(tkn));
-            if(mtr.embarazos == undefined || new Date(mtr.embarazos).getTime < new Date(mtw.embarazos).getTime)
+                console.log('perfil listo')
+            }else
+                console.log(mtr.perfil + mtw.perfil)
+                
+            console.log(mtr.embarazos , mtw.embarazos)
+            if(mtr.embarazos == 0 || new Date(mtr.embarazos).getTime < new Date(mtw.embarazos).getTime){
+                console.log('Get embarazos');
                 await dispatch(getEmbarazos(tkn));
-            if(mtr.crias == undefined || new Date(mtr.crias).getTime < new Date(mtw.crias).getTime)
+                console.log('embarazos listos');
+            }
+                
+            if(mtr.crias == 0 || new Date(mtr.crias).getTime < new Date(mtw.crias).getTime)
                 await dispatch(getCrias(tkn));
-            if(mtr.sanitarios == undefined || new Date(mtr.sanitarios).getTime < new Date(mtw.sanitarios).getTime)
+            if(mtr.sanitarios == 0 || new Date(mtr.sanitarios).getTime < new Date(mtw.sanitarios).getTime)
                 await dispatch(getSanitarios(tkn));
-            if(mtr.ctl_animal == undefined || new Date(mtr.ctl_animal).getTime < new Date(mtw.ctl_animal).getTime)
+            if(mtr.ctl_animal == 0 || new Date(mtr.ctl_animal).getTime < new Date(mtw.ctl_animal).getTime)
                 await dispatch(getControlAnimal(tkn));
-            if(mtr.pesajes == undefined || new Date(mtr.pesajes).getTime < new Date(mtw.pesajes).getTime)
+            if(mtr.pesajes == 0 || new Date(mtr.pesajes).getTime < new Date(mtw.pesajes).getTime)
                 await dispatch(getPesajes(tkn));
-            if(mtr.predios == undefined || new Date(mtr.predios).getTime < new Date(mtw.predios).getTime)
+            if(mtr.predios == 0 || new Date(mtr.predios).getTime < new Date(mtw.predios).getTime)
                 await dispatch(getPredios(tkn));
-            if(mtr.predio_animal == undefined || new Date(mtr.predio_animal).getTime < new Date(mtw.predio_animal).getTime)
+            if(mtr.predio_animal == 0 || new Date(mtr.predio_animal).getTime < new Date(mtw.predio_animal).getTime)
                 await dispatch(getPredioAnimal(tkn));
-            if(mtr.vacunas == undefined || new Date(mtr.vacunas).getTime < new Date(mtw.vacunas).getTime)
+            if(mtr.vacunas == 0 || new Date(mtr.vacunas).getTime < new Date(mtw.vacunas).getTime)
                 await dispatch(getVacunas(tkn));
-            if(mtr.vac_animal == undefined || new Date(mtr.vac_animal).getTime < new Date(mtw.vac_animal).getTime)
+            if(mtr.vac_animal == 0 || new Date(mtr.vac_animal).getTime < new Date(mtw.vac_animal).getTime)
                 await dispatch(getVacunaAnimal(tkn));
         }catch(error){
             console.log(error);
